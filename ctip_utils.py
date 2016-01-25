@@ -24,7 +24,7 @@ class CTIPDatabaseManager:
         coltypes = []
         configs = []
 
-        conn = sql.connect(dbname)
+        conn = sql.connect(self.dbname)
         with conn:
 
             conn.row_factory = sql.Row
