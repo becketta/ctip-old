@@ -3,12 +3,11 @@
 # Created by Aaron Beckett January, 2016
 #
 
-import sys, os
+import sys
 import getopt
-import datetime
 from multiprocessing import Process
 
-from ctip_utils import CTIPDatabaseManager
+import ctip_utils as ctip
 
 whereClause = ""
 
@@ -43,11 +42,6 @@ def runConfig(config, outdir="", tag=""):
     print "Run config " + str(config["id"])
 
 def main(argv):
-    #
-    # Get an instance of the ctip local database manager
-    #
-    manager = CTIPDatabaseManager()
-
     #
     # Get command line args from sys.argv with getopt
     #
@@ -84,48 +78,14 @@ def main(argv):
     elif configFileName != "":
         with open(configFileName, 'r') as configFile:
             if generate:
-                configTable = manager.generateConfigTable(configFile)
+                configTable = ctip.generateConfigTable(configFile)
             else:
-                configTable = manager.createConfigTable(configFile)
+                configTable = ctip.createConfigTable(configFile)
 
     #
-    # Get configs from the database
+    # Initialize the test session!
     #
-    colnames,coltypes,configs = manager.getConfigs(configTable, whereClause)
-
-    #
-    # Create a folder for this test session based on the date and time
-    #   -> The directory being created is:
-    #           <outDir>/<configTable>/<date_time>/
-    #   -> Each config will create a folder in this directory
-    #
-    now = datetime.datetime.now()
-    sec = now.second
-    timestamp = now.strftime("%Y-%m-%d_%H:%M:") + str(sec)
-
-    testBatchDir = os.path.join(outDir, configTable, timestamp)
-    try:
-        os.makedirs(testBatchDir)
-    except OSError:
-        if not os.path.isdir(testBatchDir):
-            raise RuntimeError('Could not create the output directory')
-
-    #
-    # Store text file snapshot of config table at root session dir
-    #
-    snapshotPath = os.path.join(testBatchDir, "configs.csv")
-    with open(snapshotPath, 'w') as sf:
-        manager.writeConfigCsv(sf, configTable, colnames, coltypes, configs)
-
-    #
-    # Spawn processes for each config to test
-    #
-    procs = []
-    for config in configs:
-        p = Process(target=runConfig, args=(config, testBatchDir))
-        p.start()
-        procs.append(p)
-
+    procs = ctip.initTestSession(runConfig, configTable, whereClause, outDir)
     print "Tests running!"
 
     #
