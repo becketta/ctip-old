@@ -1,16 +1,18 @@
 #!/usr/bin/python
+#
+# Created by Aaron Beckett January, 2016
+#
 
-import sqlite3 as lite
 import sys, os
 import getopt
 import datetime
-import csv
 from multiprocessing import Process
+
+from ctip_utils import CTIPDatabaseManager
 
 whereClause = ""
 
-configDatabase = "test.db"
-p3executable = "~/MarkovBrain/p3brain"
+p3executable = "~/MarkovBrain/testing/p3brain"
 defaultConfig = "~/MarkovBrain/P3Brain/FastEfficientP3/config/default.cfg"
 
 helpText = """
@@ -41,10 +43,16 @@ def runConfig(config, outdir="", tag=""):
     print "Run config " + str(config["id"])
 
 def main(argv):
+    #
+    # Get an instance of the ctip local database manager
+    #
+    manager = CTIPDatabaseManager()
+
+    #
+    # Get command line args from sys.argv with getopt
+    #
     shortArgs = "o:f:g"
     longArgs = ["outdir=", "config-file=", "generate"]
-
-    # Get command line args from sys.argv with getopt
     try:
         opts,args = getopt.getopt(argv[1:], shortArgs, longArgs)
     except getopt.GetoptError:
@@ -76,34 +84,14 @@ def main(argv):
     elif configFileName != "":
         with open(configFileName, 'r') as configFile:
             if generate:
-                configTable = generateConfigTable(configFile)
+                configTable = manager.generateConfigTable(configFile)
             else:
-                configTable = createConfigTable(configFile)
+                configTable = manager.createConfigTable(configFile)
 
     #
     # Get configs from the database
     #
-    colnames = []
-    coltypes = []
-    configs = []
-
-    conn = lite.connect(configDatabase)
-    with conn:
-
-        conn.row_factory = lite.Row
-        cur = conn.cursor()
-
-        # Get the column info
-        cur.execute("PRAGMA table_info(" + configTable + ")")
-        columns = cur.fetchall()
-        for col in columns:
-            colnames.append(col[1])
-            coltypes.append(col[2])
-
-        # Get the relevant configurations
-        #   -> if whereClause is "", get all the configs in the table
-        cur.execute("SELECT * FROM " + configTable + " " + whereClause)
-        configs = cur.fetchall()
+    colnames,coltypes,configs = manager.getConfigs(configTable, whereClause)
 
     #
     # Create a folder for this test session based on the date and time
@@ -115,28 +103,28 @@ def main(argv):
     sec = now.second
     timestamp = now.strftime("%Y-%m-%d_%H:%M:") + str(sec)
 
-    dir = os.path.join(outDir, configTable, timestamp)
+    testBatchDir = os.path.join(outDir, configTable, timestamp)
     try:
-        os.makedirs(dir)
+        os.makedirs(testBatchDir)
     except OSError:
-        if not os.path.isdir(dir):
+        if not os.path.isdir(testBatchDir):
             raise RuntimeError('Could not create the output directory')
 
     #
     # Store text file snapshot of config table at root session dir
     #
-    summaryPath = os.path.join(dir, "configs.txt")
+    snapshotPath = os.path.join(testBatchDir, "configs.csv")
+    with open(snapshotPath, 'w') as sf:
+        manager.writeConfigCsv(sf, configTable, colnames, coltypes, configs)
+
+    #
+    # Spawn processes for each config to test
+    #
     procs = []
-    with open(summaryPath, 'w') as summary:
-        writer = csv.writer(summary)
-        writer.writerow([configTable])
-        writer.writerow(colnames)
-        writer.writerow(coltypes)
-        for config in configs:
-            writer.writerow(list(config))
-            p = Process(target=runConfig, args=(config, outDir))
-            p.start()
-            procs.append(p)
+    for config in configs:
+        p = Process(target=runConfig, args=(config, testBatchDir))
+        p.start()
+        procs.append(p)
 
     print "Tests running!"
 
@@ -148,21 +136,6 @@ def main(argv):
 
     print "Tests complete!"
 
-def createConfigTable(csv_file):
-    """Creates new config table filled with the csv file configs"""
-    configTableName = ""
-    reader = csv.reader(csv_file)
-
-    # Get the name of this group of configs
-    row = reader.next()
-    if len(row) == 1:
-        configTableName = row[0]
-    else:
-        raise RuntimeError('First line of csv file must be 
-
-def generateConfigTable(csv_file):
-    """Generates new config table of all combinations of csv config values"""
-    raise NotImplementedError
 
 if __name__ == "__main__":
     main(sys.argv)
