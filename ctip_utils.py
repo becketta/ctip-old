@@ -58,23 +58,21 @@ class DatabaseManager:
 
     def getConfigs(self, table, whereClause=""):
 
-        infoquery = "PRAGMA table_info(" + table + ")"
         configquery = "SELECT * FROM " + table + " " + whereClause
 
-        # Get the column info
-        colnames = []
-        coltypes = []
-        for col in self.conn.execute(infoquery):
-            colnames.append(col[1])
-            coltypes.append(col[2])
+        cur = self.conn.cursor()
+        cur.execute(configquery)
+
+        # Get the column names
+        colnames = [cn[0] for cn in cur.description]
 
         # Get the relevant configurations
         #   -> if whereClause is "", get all the configs in the table
-        configs = self.conn.execute(configquery).fetchall()
+        configs = cur.fetchall()
 
-        return colnames,coltypes,configs
+        return colnames,configs
 
-    def addConfigTable(self, name, colnames, coltypes, configs):
+    def addConfigTable(self, name, colnames, configs):
         pass
 
 
@@ -85,52 +83,39 @@ class DatabaseManager:
 def storeSnapshot(table, outfile):
     """Store the contents of a config table as a csv file."""
     db = DatabaseManager()
-    cols,types,configs = db.getConfigs(table)
-    writeConfigCsv(outfile, table, cols, types, configs)
+    cols,configs = db.getConfigs(table)
+    writeConfigCsv(outfile, table, cols, configs)
     
-def writeConfigCsv(outfile, tablename, cols, types, configs):
+def writeConfigCsv(outfile, tablename, cols, configs):
     """Write the given table info in csv format."""
     writer = csv.writer(outfile)
     writer.writerow([tablename])
     writer.writerow(cols)
-    writer.writerow(types)
     for config in configs:
         writer.writerow(list(config))
         
 def createConfigTable(csv_file):
     """Creates new config table from a properly formatted csv file."""
-    configTableName = ""
     reader = csv.reader(csv_file)
 
-    # Get the name of this group of configs
-    row = next(reader)
-    if len(row) == 1:
-        configTableName = row[0]
-    else:
-        e = "First line of csv file must be the name of this \
-                group of configs"
-        raise RuntimeError(e)
-
-    # Get the column names and types
+    configTableName = parseTableName(reader)
+    
+    # Get the column names 
     cols = next(reader)
-    types = next(reader)
-
-    # Zip the column names to the column types
-    if len(cols) != len(types):
-        e = "Line 2 and 3 must contain column names and data types \
-                respectively"
-        raise RuntimeError(e)
-    else:
-        colinfo = zip(cols,types)
 
     return configTableName
 
 def generateConfigTable(csv_file):
     """Generates config table from csv file of valid config parameters."""
-    configTableName = ""
     reader = csv.reader(csv_file)
 
+    configTableName = parseTableName(reader)
+
+    return configTableName
+
+def parseTableName(reader):
     # Get the name of this group of configs
+    configTableName = ""
     row = next(reader)
     if len(row) == 1:
         configTableName = row[0]
@@ -150,7 +135,7 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     manager = DatabaseManager()
 
     # Get configs from the database
-    colnames,coltypes,configs = manager.getConfigs(table, whereClause)
+    colnames,configs = manager.getConfigs(table, whereClause)
 
     #
     # Create a folder for this test session based on the date and time
@@ -172,7 +157,7 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     # Store text file snapshot of config table at root session dir
     snapshotPath = os.path.join(testBatchDir, "configs.csv")
     with open(snapshotPath, 'w') as sf:
-        writeConfigCsv(sf, table, colnames, coltypes, configs)
+        writeConfigCsv(sf, table, colnames, configs)
 
     # Spawn processes for each config to test
     test_processes = []
