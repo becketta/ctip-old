@@ -73,8 +73,55 @@ class DatabaseManager:
         return colnames,configs
 
     def addConfigTable(self, name, colnames, configs):
-        pass
+        
+        insertColNames = '(' + ','.join(colnames) + ')'
+        alreadyHasId = False
+        if colnames[0] in ["id", "ID"]:
+            alreadyHasId = True
 
+        #
+        # Generate the create table query
+        #
+        # Ensure the first column is an auto-incremented primary key
+        if alreadyHasId:
+            colnames[0] = "{0} INTEGER PRIMARY KEY".format(colnames[0])
+        else:
+            colnames.insert(0, "id INTEGER PRIMARY KEY")
+        # Add the column names to the create query
+        colStr = "("
+        for col in colnames:
+            colStr += "{0},".format(col)
+        colStr = colStr[:-1] + ')'
+        createSql = "CREATE TABLE {0}{1};".format(name,colStr)
+
+        #
+        # Compile the sql queries into a list
+        #
+        sqls = [ "DROP TABLE IF EXISTS {0};".format(name),
+                 createSql ]
+
+        #
+        # Construct the insert template
+        #
+        insertSql = "INSERT INTO {0}{1} values(".format(name,insertColNames)
+        # Ensure the id column, if present, is stored as an int
+        id_offset = 0
+        if alreadyHasId:
+            insertSql += "{0},"
+            id_offset = 1
+        for i in range(id_offset, len(configs[0])):
+            insertSql += "'{" + str(i) + "}',"
+        insertSql = insertSql[:-1] + ');'
+
+        #
+        # Add an insert statement for each config
+        #
+        for config in configs:
+            sqls.append(insertSql.format(*config))
+
+        # Execute the sql statements
+        cur = self.conn.cursor()
+        cur.executescript("".join(sqls))
 
 ###########################################################
 #   Utility Functions
@@ -103,6 +150,13 @@ def createConfigTable(csv_file):
     # Get the column names 
     cols = next(reader)
 
+    configs = []
+    for config in reader:
+        configs.append(config)
+
+    db = DatabaseManager()
+    db.addConfigTable(configTableName, cols, configs)
+
     return configTableName
 
 def generateConfigTable(csv_file):
@@ -110,6 +164,12 @@ def generateConfigTable(csv_file):
     reader = csv.reader(csv_file)
 
     configTableName = parseTableName(reader)
+
+    cols = []
+    configs = []
+
+    db = DatabaseManager()
+    db.addConfigTable(configTableName, cols, configs)
 
     return configTableName
 
