@@ -18,6 +18,12 @@ class CTIPError(Exception):
     def __init__(self, msg):
         self.msg = msg
 
+class ParseError(CTIPError):
+    """Raised when ctip is unable to parse command line args or csv files."""
+    def __init__(self, category, msg):
+        super(ParseError,self).__init__(msg)
+        self.category = category
+
 class DatabaseManager:
     """Handles interactions with the local SQLite Database used by ctip."""
 
@@ -182,8 +188,6 @@ def generateConfigTable(gen_file):
     configs = []
     for col in cols:
         configs = generateCombos(configs, colDict[col])
-    print "Final configs:"
-    print configs
 
     db = DatabaseManager()
     db.addConfigTable(configTableName, cols, configs)
@@ -213,7 +217,7 @@ def parseTableName(reader):
     else:
         e = "First line of csv file must be the name of this \
                 group of configs"
-        raise RuntimeError(e)
+        raise CTIPError(e)
 
     return configTableName
 

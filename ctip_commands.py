@@ -17,30 +17,35 @@ def run(argv):
     try:
         opts,args = getopt.getopt(argv, shortArgs, longArgs)
     except getopt.GetoptError:
-        print helpText
-        sys.exit(2)
+        m = "Unable to extract command line args."
+        raise ctip_utils.ParseError('args', m)
+    #
+    # Get the config table name if present
+    #
+    configTable = ""
+    try:
+        configTable = getPrimaryArg(args)
+    except ctip_utils.ParseError:
+        pass
     #
     # Parse command line args
     #
-    configTable = ""
     outDir = ""
     configFileName = ""
-
     for opt, arg in opts:
         if opt in ("-o", "--outdir"):
             outDir = arg
         elif opt in ("-f", "--config-file"):
             configFileName = arg
-
-    if len(args) == 1:
-        configTable = args[0]
-
+    #
+    # See if they've called run correctly and handle a config file
+    #
     if configTable != "" and configFileName != "":
-        print helpText
-        sys.exit(2)
+        m = "Cannot specify both a config table and a config file to run."
+        raise ctip_utils.ParseError('args', m)
     elif configFileName != "":
         with open(configFileName, 'r') as configFile:
-            configTable = ctip.createConfigTable(configFile)
+            configTable = ctip_utils.createConfigTable(configFile)
     #
     # Initialize the test session!
     #
@@ -48,24 +53,60 @@ def run(argv):
     print "Jobs submitted!"
 
 def gen(argv):
-    #
-    # Get the file with the config table schema
-    #
-    genfileName = ""
-    if len(argv) == 1:
-        genfileName = argv[0]
+    genfileName = getPrimaryArg(argv)
 
     try:
-        with open(genfileName):
-            pass
+        with open(genfileName, 'r') as configSchema:
+            ctip_utils.generateConfigTable(configSchema)
     except IOError:
         pass
 
-    print "Gen"
+def tables(argv):
+    db = ctip_utils.DatabaseManager()
+    db.listConfigTables()
 
-def info(argv):
-    print "Info"
+def list(argv):
+    configTableName = getPrimaryArg(argv)
+
+    db = ctip_utils.DatabaseManager()
+    db.printConfigTable(configTableName)
+
+def save(argv):
+    #
+    # Get command line args with getopt
+    #
+    shortArgs = "o:"
+    longArgs = ["outfile="]
+    try:
+        opts,args = getopt.getopt(argv, shortArgs, longArgs)
+    except getopt.GetoptError:
+        m = "Unable to extract command line args."
+        raise ctip_utils.ParseError('args', m)
+    #
+    # Parse command line args
+    #
+    configTableName = getPrimaryArg(args)
+    outFileName = ""
+    for opt, arg in opts:
+        if opt in ("-o", "--outfile"):
+            outFileName = arg
+    if not outFileName:
+        outFileName = configTableName + '.csv'
+
+    with open(outFileName, 'w') as outfile:
+        ctip_utils.storeSnapshot(configTableName, outfile)
 
 def check(argv):
     print "Check"
+
+def getPrimaryArg(argv):
+    """Gets the first argument in args."""
+    print argv
+    configTableName = ""
+    if len(argv) == 1:
+        configTableName = argv[0]
+    else:
+        raise ctip_utils.ParseError("args", "Unable to parse table name.")
+
+    return configTableName
 

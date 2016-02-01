@@ -50,12 +50,16 @@ def main(argv):
             ctip.run(argv[2:])
         elif command == "gen":
             ctip.gen(argv[2:])
-        elif command == "info":
-            ctip.info(argv[2:])
+        elif command == "tables":
+            ctip.tables(argv[2:])
+        elif command == "list":
+            ctip.list(argv[2:])
+        elif command == "save":
+            ctip.save(argv[2:])
         elif command == "check":
             ctip.check(argv[2:])
         else:
-            raise RuntimeError
+            raise CTIPError("No CTIP command named '" + command + "'.")
 
     except IndexError, RuntimeError:
         print helpText
