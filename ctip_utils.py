@@ -244,13 +244,13 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     with open(snapshotPath, 'w') as sf:
         writeConfigCsv(sf, table, colnames, configs)
 
-    # Spawn processes for each config to test
-    test_processes = []
+    # Call the test_function for each config
+    jobs = []
     for config in configs:
         p = Process(target=test_func, args=(config, testBatchDir))
         p.start()
-        test_processes.append(p)
+        jobs.append(p)
 
-    for p in procs:
+    for p in jobs:
         p.join()
 

@@ -3,3 +3,4 @@
 *.pyc
 runP3brain.qsub
 Makefile
+Configs/*
