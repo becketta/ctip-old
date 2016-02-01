@@ -7,6 +7,7 @@ import os
 import csv
 import datetime
 from multiprocessing import Process
+from copy import deepcopy
 
 ###########################################################
 #   Utility Classes
@@ -159,21 +160,45 @@ def createConfigTable(csv_file):
 
     return configTableName
 
-def generateConfigTable(csv_file):
+def generateConfigTable(gen_file):
     """Generates config table from csv file of valid config parameters."""
-    reader = csv.reader(csv_file)
-
+    reader = csv.reader(gen_file)
     configTableName = parseTableName(reader)
 
     cols = []
+    colDict = {}
+    for line in gen_file:
+        line = line.strip()
+        key,values = line.split('|')
+        cols.append(key)
+        colDict[key] = values.split(',')
+
     configs = []
+    for col in cols:
+        configs = generateCombos(configs, colDict[col])
+    print "Final configs:"
+    print configs
 
     db = DatabaseManager()
     db.addConfigTable(configTableName, cols, configs)
 
     return configTableName
 
+def generateCombos(combos, vals):
+    new_combos = []
+    if not combos:
+        for val in vals:
+            new_combos.append([val])
+    else:
+        for combo in combos:
+            for val in vals:
+                new_combo = deepcopy(combo)
+                new_combo.append(val)
+                new_combos.append(new_combo)
+    return new_combos
+
 def parseTableName(reader):
+    """Get the name of the config table represented in the csv file."""
     # Get the name of this group of configs
     configTableName = ""
     row = next(reader)
@@ -226,6 +251,6 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
         p.start()
         test_processes.append(p)
 
-    return test_processes
-
+    for p in procs:
+        p.join()
 
