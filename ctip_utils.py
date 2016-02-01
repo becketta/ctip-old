@@ -13,7 +13,13 @@ from copy import deepcopy
 #   Utility Classes
 #
 
+class CTIPError(Exception):
+    """Base class for ctip exceptions."""
+    def __init__(self, msg):
+        self.msg = msg
+
 class DatabaseManager:
+    """Handles interactions with the local SQLite Database used by ctip."""
 
     dbname = "test.db"
 

@@ -5,6 +5,7 @@
 
 import sys
 
+from ctip_utils import CTIPError
 import ctip_commands as ctip
 
 helpText = """
@@ -59,6 +60,9 @@ def main(argv):
     except IndexError, RuntimeError:
         print helpText
         sys.exit(2)
+
+    except CTIPError as e:
+        print e.msg
         
 if __name__ == "__main__":
     main(sys.argv)
