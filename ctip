@@ -10,16 +10,20 @@ import ctip_commands as ctip
 
 helpText = """
 ./ctip <command> <args>
-ctip run [-o <out_dir>] <config_table_name>
-ctip run [-o <out_dir>] -f <config_file>
 
 COMMANDS:
 
-    run:
+    run:    ./ctip run [-o <out_dir>] <config_table_name>
+                            OR
+            ./ctip run [-o <out_dir>] -f <config_file>
 
-    gen:
+    gen:    ./ctip gen <gen_config_file>
 
-    info:
+    tables: ./ctip tables
+
+    info:   ./ctip info <table_name>
+
+    save:   ./ctip save [-o <out_dir>] <table_name>
 
     check:
 

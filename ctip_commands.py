@@ -2,11 +2,10 @@
 # Created by Aaron Beckett January, 2016
 #
 import getopt
+import string
 
 import ctip_utils
 from run_config import runConfig
-
-whereClause = ""
 
 def run(argv):
     #
@@ -19,6 +18,15 @@ def run(argv):
     except getopt.GetoptError:
         m = "Unable to extract command line args."
         raise ctip_utils.ParseError('args', m)
+    #
+    # Get the where clause if present
+    #
+    whereClause = ""
+    for s in args:
+        if string.lower(s).startswith("where"):
+            whereClause = s
+            break
+    args.remove(s)
     #
     # Get the config table name if present
     #
@@ -101,7 +109,6 @@ def check(argv):
 
 def getPrimaryArg(argv):
     """Gets the first argument in args."""
-    print argv
     configTableName = ""
     if len(argv) == 1:
         configTableName = argv[0]
