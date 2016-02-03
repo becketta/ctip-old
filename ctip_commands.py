@@ -26,7 +26,8 @@ def run(argv):
         if string.lower(s).startswith("where"):
             whereClause = s
             break
-    args.remove(s)
+    if whereClause:
+        args.remove(whereClause)
     #
     # Get the config table name if present
     #
