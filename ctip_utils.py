@@ -8,6 +8,7 @@ import csv
 import datetime
 from multiprocessing import Process
 from copy import deepcopy
+from string import Template
 
 ###########################################################
 #   Utility Classes
@@ -23,6 +24,9 @@ class ParseError(CTIPError):
     def __init__(self, category, msg):
         super(ParseError,self).__init__(msg)
         self.category = category
+
+class QsubBuilder(Template):
+    delimiter = '%='
 
 class DatabaseManager:
     """Handles interactions with the local SQLite Database used by ctip."""
