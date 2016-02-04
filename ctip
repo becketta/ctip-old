@@ -21,7 +21,7 @@ COMMANDS:
 
     tables: ./ctip tables
 
-    info:   ./ctip info <table_name>
+    list:   ./ctip list <table_name>
 
     save:   ./ctip save [-o <out_dir>] <table_name>
 

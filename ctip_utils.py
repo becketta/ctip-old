@@ -244,7 +244,7 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     #
     now = datetime.datetime.now()
     sec = now.second
-    timestamp = now.strftime("%Y-%m-%d_%H:%M:") + str(sec)
+    timestamp = now.strftime("%Y-%m-%d_%H.%M.") + str(sec)
 
     testBatchDir = os.path.join(outdir, table, timestamp)
     try:
