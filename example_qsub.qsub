@@ -20,5 +20,8 @@ RUN_CONFIG="%=config_file"  # %= can be used anywhere in the file
 
 echo "$P3_EXEC $DEFAULT_CONFIG $RUN_CONFIG"
 
+echo
+echo
+echo
 qstat -f ${PBS_JOBID}
 
