@@ -1,0 +1,5 @@
+bows
+type|long,recurve
+length|60,62,64,70,72
+wood|osage orange,yew,hickory
+hand|left,right

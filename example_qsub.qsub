@@ -1,0 +1,24 @@
+#!/bin/bash -login
+#PBS -l walltime=03:59:00,nodes=1:ppn=1,mem=6GB
+#PBS -l feature=intel14
+#PBS -j oe
+#PBS -N %=job_name
+#PBS -o %=shell_out_file
+cd ${PBS_O_WORKDIR}
+
+#
+# Notice how '%=' is used to mark keys that must be replaced
+# by name in the runConfig function found in run_config.py
+#
+
+module load GNU/4.8.3
+module load PyMySQL/1.2.3
+
+P3_EXEC="~/MarkovBrain/testing/p3brain"
+DEFAULT_CONFIG="~/MarkovBrain/P3Brain/FastEfficientP3/config/default.cfg"
+RUN_CONFIG="%=config_file"  # %= can be used anywhere in the file
+
+echo "$P3_EXEC $DEFAULT_CONFIG $RUN_CONFIG"
+
+qstat -f ${PBS_JOBID}
+
