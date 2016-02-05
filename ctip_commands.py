@@ -78,7 +78,7 @@ def list(argv):
     configTableName = getPrimaryArg(argv)
 
     db = ctip_utils.DatabaseManager()
-    db.printConfigTable(configTableName)
+    db.printTable(configTableName)
 
 def save(argv):
     #

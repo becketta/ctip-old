@@ -32,22 +32,38 @@ class DatabaseManager:
     """Handles interactions with the local SQLite Database used by ctip."""
 
     dbname = "test.db"
+    reserved_table_names = [ 'sessions', 'jobs' ]
 
     def __init__(self):
         self.conn = sql.connect(self.dbname)
         self.conn.row_factory = sql.Row
+        self.conn.executescript("""
+            CREATE TABLE IF NOT EXISTS sessions(
+                id INTEGER PRIMARY KEY,
+                config_group TEXT,
+                where_clause TEXT,
+                date TEXT
+            );
+
+            CREATE TABLE IF NOT EXISTS jobs(
+                session_id INT,
+                job_id TEXT,
+                PRIMARY KEY (session_id, job_id)
+            );
+            """)
 
     def __del__(self):
         self.conn.close()
 
     def listConfigTables(self):
-        """List the names of all tables in the database."""
+        """List the names of all config tables in the database."""
         query = "SELECT name FROM sqlite_master WHERE type='table'"
         for row in self.conn.execute(query):
-            print row[0]
+            if row[0] not in self.reserved_table_names:
+                print row[0]
 
-    def printConfigTable(self, table):
-        """Print the configs from a specific table in a pretty format."""
+    def printTable(self, table):
+        """Print the records from a specific table in a pretty format."""
         cur = self.conn.cursor()
         cur.execute('SELECT * FROM ' + table)
 
@@ -73,23 +89,26 @@ class DatabaseManager:
         for row in printrows:
             print printstr % tuple(row)
 
-    def getConfigs(self, table, whereClause=""):
+    def getRecords(self, table, whereClause=""):
 
-        configquery = "SELECT * FROM " + table + " " + whereClause
+        query = "SELECT * FROM " + table + " " + whereClause
 
         cur = self.conn.cursor()
-        cur.execute(configquery)
+        cur.execute(query)
 
         # Get the column names
         colnames = [cn[0] for cn in cur.description]
 
         # Get the relevant configurations
         #   -> if whereClause is "", get all the configs in the table
-        configs = cur.fetchall()
+        records = cur.fetchall()
 
-        return colnames,configs
+        return colnames,records
 
     def addConfigTable(self, name, colnames, configs):
+
+        if name.lower() in self.reserved_table_names:
+            raise CTIPError(name + " is a reserved table name.")
         
         insertColNames = '(' + ','.join(colnames) + ')'
         alreadyHasId = False
@@ -147,7 +166,7 @@ class DatabaseManager:
 def storeSnapshot(table, outfile):
     """Store the contents of a config table as a csv file."""
     db = DatabaseManager()
-    cols,configs = db.getConfigs(table)
+    cols,configs = db.getRecords(table)
     writeConfigCsv(outfile, table, cols, configs)
     
 def writeConfigCsv(outfile, tablename, cols, configs):
@@ -234,7 +253,7 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     manager = DatabaseManager()
 
     # Get configs from the database
-    colnames,configs = manager.getConfigs(table, whereClause)
+    colnames,configs = manager.getRecords(table, whereClause)
 
     #
     # Create a folder for this test session based on the date and time
