@@ -4,14 +4,15 @@
 import os, sys
 from ctip_utils import QsubBuilder
 from subprocess import call
+from multiprocessing import Queue
 
 ################################################################
 # Set this variable to the name of your templated qsub file
 ################################################################
-templated_qsub_file = "runP3brain.qsub"
+templated_qsub_file = "trial.qsub"
 
 
-def runConfig(config, outdir=""):
+def runConfig(config, queue, outdir=""):
     """Run a program using given configuration"""
 
     # Build the directory for this run

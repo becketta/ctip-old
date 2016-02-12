@@ -25,7 +25,7 @@ COMMANDS:
 
     save:   ./ctip save [-o <out_dir>] <table_name>
 
-    check:
+    check:  ./ctip check
 
 config_table_name
     Name of the configuration table in the data base that stores

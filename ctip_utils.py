@@ -6,7 +6,7 @@ import sqlite3 as sql
 import os
 import csv
 import datetime
-from multiprocessing import Process
+from multiprocessing import Process, Queue
 from copy import deepcopy
 from string import Template
 
@@ -48,12 +48,23 @@ class DatabaseManager:
             CREATE TABLE IF NOT EXISTS jobs(
                 session_id INT,
                 job_id TEXT,
+                state TEXT,
                 PRIMARY KEY (session_id, job_id)
             );
-            """)
+        """)
 
     def __del__(self):
         self.conn.close()
+
+    def newSession(self, config_group, datetime, whereClause=""):
+        if whereClause:
+            s = "INSERT INTO sessions(config_group, where_clause, date) \
+                    values('{0}', '{1}', '{2}');"
+            self.conn.execute(s.format(config_group, whereClause, datetime))
+        else:
+            s = "INSERT INTO sessions(config_group, date) \
+                    values('{0}', '{1}');"
+            self.conn.execute(s.format(config_group, datetime))
 
     def listConfigTables(self):
         """List the names of all config tables in the database."""
@@ -264,6 +275,7 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     now = datetime.datetime.now()
     sec = now.second
     timestamp = now.strftime("%Y-%m-%d_%H.%M.") + str(sec)
+    sql_datetime_str = now.strftime("%Y-%m-%d %H:%M:") + str(sec)
 
     testBatchDir = os.path.join(outdir, table, timestamp)
     try:
@@ -277,13 +289,26 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     with open(snapshotPath, 'w') as sf:
         writeConfigCsv(sf, table, colnames, configs)
 
+    # Add this session info to the sessions table
+    manager.newSession(table, sql_datetime_str, whereClause)
+
     # Call the test_function for each config
     jobs = []
+    id_queue = Queue()
     for config in configs:
-        p = Process(target=test_func, args=(config, testBatchDir))
+        p = Process(target=test_func, args=(config, id_queue, testBatchDir))
         p.start()
         jobs.append(p)
-
     for p in jobs:
         p.join()
+
+    id_queue.close()
+    id_queue.join_thread()
+    job_ids = []
+    try:
+        job_ids.append(id_queue.get())
+    except:
+        pass
+
+    print job_ids
 
