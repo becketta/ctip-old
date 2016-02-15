@@ -66,11 +66,11 @@ def main(argv):
             raise CTIPError("No CTIP command named '" + command + "'.")
 
     except IndexError, RuntimeError:
-        print helpText
+        print(helpText)
         sys.exit(2)
 
     except CTIPError as e:
-        print e.msg
+        print(e.msg)
         
 if __name__ == "__main__":
     main(sys.argv)

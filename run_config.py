@@ -3,7 +3,7 @@
 #
 import os, sys
 from ctip_utils import QsubBuilder
-from subprocess import call
+from subprocess import Popen, PIPE
 from multiprocessing import Queue
 
 ################################################################
@@ -103,7 +103,9 @@ def runConfig(config, queue, outdir=""):
     #
     # Submit the job to the scheduler using the temporary qsub file
     #
-    call(['qsub', run_qsub])
+    proc = Popen(['qsub', run_qsub], stdout=PIPE)
+    job_id = proc.stdout.read()
+    queue.put(job_id)
     # Delete the temporary qsub file
     os.remove(run_qsub)
 

@@ -7,6 +7,7 @@ import os
 import csv
 import datetime
 from multiprocessing import Process, Queue
+from Queue import Empty as QueueEmpty
 from copy import deepcopy
 from string import Template
 
@@ -48,7 +49,7 @@ class DatabaseManager:
             CREATE TABLE IF NOT EXISTS jobs(
                 session_id INT,
                 job_id TEXT,
-                state TEXT,
+                status TEXT,
                 PRIMARY KEY (session_id, job_id)
             );
         """)
@@ -57,14 +58,32 @@ class DatabaseManager:
         self.conn.close()
 
     def newSession(self, config_group, datetime, whereClause=""):
+        cur = self.conn.cursor()
         if whereClause:
-            s = "INSERT INTO sessions(config_group, where_clause, date) \
-                    values('{0}', '{1}', '{2}');"
-            self.conn.execute(s.format(config_group, whereClause, datetime))
+            s = "INSERT INTO sessions(config_group, where_clause, date) values(?,?,?)"
+            cur.execute(s, (config_group, whereClause, datetime))
         else:
-            s = "INSERT INTO sessions(config_group, date) \
-                    values('{0}', '{1}');"
-            self.conn.execute(s.format(config_group, datetime))
+            cur.execute("INSERT INTO sessions(config_group, date) values(?,?)", (config_group, datetime))
+
+        new_session_id = cur.lastrowid
+        self.conn.commit()
+        return new_session_id
+
+    def addJobToSession(self, session_id, job_id):
+        s = "INSERT INTO jobs(session_id,job_id,status) values(?,?,?)"
+        self.conn.execute(s, (session_id, job_id, "submitted"))
+        self.conn.commit()
+
+    def updateJobStatus(self, job_id, status):
+        s = "UPDATE jobs SET status = ? WHERE job_id = ?"
+        self.conn.execute(s, (status, job_id))
+        self.conn.commit()
+
+    def deleteSession(self, session_id):
+        s = "DELETE FROM jobs WHERE session_id = ?"
+        self.conn.execute(s, (session_id))
+        s = "DELETE FROM sessions WHERE id = ?"
+        self.conn.execute(s, (session_id))
 
     def listConfigTables(self):
         """List the names of all config tables in the database."""
@@ -290,7 +309,7 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
         writeConfigCsv(sf, table, colnames, configs)
 
     # Add this session info to the sessions table
-    manager.newSession(table, sql_datetime_str, whereClause)
+    session_id = manager.newSession(table, sql_datetime_str, whereClause)
 
     # Call the test_function for each config
     jobs = []
@@ -302,13 +321,14 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     for p in jobs:
         p.join()
 
-    id_queue.close()
-    id_queue.join_thread()
     job_ids = []
     try:
-        job_ids.append(id_queue.get())
-    except:
+        while True:
+            job_ids.append(id_queue.get_nowait())
+    except QueueEmpty:
         pass
 
-    print job_ids
+    print(job_ids)
+    for id in job_ids:
+        manager.addJobToSession(session_id, id)
 
