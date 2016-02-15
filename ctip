@@ -27,6 +27,10 @@ COMMANDS:
 
     check:  ./ctip check
 
+    clean:  ./ctip clean
+                OR
+            ./ctip clean <session_id>
+
 config_table_name
     Name of the configuration table in the data base that stores
     the configuration to be run by this script.
@@ -62,6 +66,8 @@ def main(argv):
             ctip.save(argv[2:])
         elif command == "check":
             ctip.check(argv[2:])
+        elif command == "clean":
+            ctip.clean(argv[2:])
         else:
             raise CTIPError("No CTIP command named '" + command + "'.")
 

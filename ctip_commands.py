@@ -108,6 +108,14 @@ def save(argv):
 def check(argv):
     print "Check"
 
+def clean(argv):
+    db = ctip_utils.DatabaseManager()
+    try:
+        session_id = getPrimaryArg(argv)
+        db.deleteSession(session_id)
+    except ctip_utils.ParseError:
+        db.deleteFinishedSessions()
+
 def getPrimaryArg(argv):
     """Gets the first argument in args."""
     configTableName = ""

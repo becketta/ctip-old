@@ -79,11 +79,15 @@ class DatabaseManager:
         self.conn.execute(s, (status, job_id))
         self.conn.commit()
 
+    def deleteFinishedSessions(self):
+        print("Delete finished sessions")
+
     def deleteSession(self, session_id):
         s = "DELETE FROM jobs WHERE session_id = ?"
         self.conn.execute(s, (session_id))
         s = "DELETE FROM sessions WHERE id = ?"
         self.conn.execute(s, (session_id))
+        self.conn.commit()
 
     def listConfigTables(self):
         """List the names of all config tables in the database."""
@@ -328,7 +332,6 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     except QueueEmpty:
         pass
 
-    print(job_ids)
     for id in job_ids:
         manager.addJobToSession(session_id, id)
 
