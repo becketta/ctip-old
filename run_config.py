@@ -105,7 +105,7 @@ def runConfig(config, queue, outdir=""):
     #
     proc = Popen(['qsub', run_qsub], stdout=PIPE)
     job_id = proc.stdout.read()
-    queue.put(job_id)
+    queue.put(job_id.strip())
     # Delete the temporary qsub file
     os.remove(run_qsub)
 
