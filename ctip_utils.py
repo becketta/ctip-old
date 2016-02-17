@@ -145,6 +145,7 @@ class DatabaseManager:
             raise CTIPError(name + " is a reserved table name.")
         
         insertColNames = '(' + ','.join(colnames) + ')'
+        num_cols = len(colnames)
         alreadyHasId = False
         if colnames[0] in ["id", "ID"]:
             alreadyHasId = True
@@ -179,7 +180,7 @@ class DatabaseManager:
         if alreadyHasId:
             insertSql += "{0},"
             id_offset = 1
-        for i in range(id_offset, len(configs[0])):
+        for i in range(id_offset, num_cols):
             insertSql += "'{" + str(i) + "}',"
         insertSql = insertSql[:-1] + ');'
 
@@ -222,6 +223,9 @@ def createConfigTable(csv_file):
 
     configs = []
     for config in reader:
+        missing_cols = len(cols) - len(config)
+        for i in range(missing_cols):
+            config.append("")
         configs.append(config)
 
     db = DatabaseManager()

@@ -9,7 +9,7 @@ from multiprocessing import Queue
 ################################################################
 # Set this variable to the name of your templated qsub file
 ################################################################
-templated_qsub_file = "trial.qsub"
+templated_qsub_file = "example_qsub.qsub"
 
 
 def runConfig(config, queue, outdir=""):
@@ -19,12 +19,13 @@ def runConfig(config, queue, outdir=""):
     try:
         runName = str(config['id'])
     except IndexError:
-        print "***ERROR***"
-        print "Unable to start job, no id specified in config"
+        print("***ERROR***")
+        print("Unable to start job, no id specified in config:")
         sys.exit(1)
     # If there is a tag column in the config, add it to the run name
     try:
-        runName += "_" + config['tag']
+        if config['tag']:
+            runName += "_" + config['tag']
     except IndexError:
         pass
     runDir = os.path.join(outdir, runName)
@@ -39,21 +40,13 @@ def runConfig(config, queue, outdir=""):
     ################################################################
 
     # Fill lines list with lines to add to EVERY config file
-    solution_file = os.path.join(runDir, "solutions.dat")
-    lines = [
-                "experiment singlerun\n",
-                "verbosity 1\n",
-                "eval_limit 25000000\n",
-                "fitness_limit 1000000.0\n",
-                "disable_solution_outfile 0\n",
-                "solution_file {0}\n".format(solution_file),
-                "disable_metadata 0\n"
-            ]
+    out_file_name = os.path.join(runDir, "ascii_images")
+    lines = [ "out_file {0}\n".format(out_file_name) ]
 
     # Loop over all columns in the config
     for key in config.keys():
         # Skip the special cols of 'id' and 'tag' that are used by ctip
-        if key not in ('id', 'tag'):
+        if key not in ('id', 'tag', 'wait_time'):
             # Create a formated line to add to the config file for
             # this key, value pair
             lines.append("{0} {1}\n".format(key, config[key]))
@@ -83,7 +76,8 @@ def runConfig(config, queue, outdir=""):
             # qsub template. For example, the below mapping replaces
             # all '%=config_file' strings in the qsub template with
             # the string stored in cfg_file
-            'config_file': cfg_file
+            'config_file': cfg_file,
+            'wait_time': config['wait_time']
         }
 
     ################################################################
