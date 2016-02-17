@@ -1,5 +1,6 @@
-bows
-type|long,recurve
-length|60,62,64,70,72
-wood|osage orange,yew,hickory
-hand|left,right
+ascii_combos
+cat|off,on
+elephant|off,on
+frog|off,on
+canadian_pride|off,on
+wait_time|5,60,300

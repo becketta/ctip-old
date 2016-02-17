@@ -1,62 +1,50 @@
-bows
-id,type,length,wood,hand
-1,long,60,osage orange,left
-2,long,60,osage orange,right
-3,long,60,yew,left
-4,long,60,yew,right
-5,long,60,hickory,left
-6,long,60,hickory,right
-7,long,62,osage orange,left
-8,long,62,osage orange,right
-9,long,62,yew,left
-10,long,62,yew,right
-11,long,62,hickory,left
-12,long,62,hickory,right
-13,long,64,osage orange,left
-14,long,64,osage orange,right
-15,long,64,yew,left
-16,long,64,yew,right
-17,long,64,hickory,left
-18,long,64,hickory,right
-19,long,70,osage orange,left
-20,long,70,osage orange,right
-21,long,70,yew,left
-22,long,70,yew,right
-23,long,70,hickory,left
-24,long,70,hickory,right
-25,long,72,osage orange,left
-26,long,72,osage orange,right
-27,long,72,yew,left
-28,long,72,yew,right
-29,long,72,hickory,left
-30,long,72,hickory,right
-31,recurve,60,osage orange,left
-32,recurve,60,osage orange,right
-33,recurve,60,yew,left
-34,recurve,60,yew,right
-35,recurve,60,hickory,left
-36,recurve,60,hickory,right
-37,recurve,62,osage orange,left
-38,recurve,62,osage orange,right
-39,recurve,62,yew,left
-40,recurve,62,yew,right
-41,recurve,62,hickory,left
-42,recurve,62,hickory,right
-43,recurve,64,osage orange,left
-44,recurve,64,osage orange,right
-45,recurve,64,yew,left
-46,recurve,64,yew,right
-47,recurve,64,hickory,left
-48,recurve,64,hickory,right
-49,recurve,70,osage orange,left
-50,recurve,70,osage orange,right
-51,recurve,70,yew,left
-52,recurve,70,yew,right
-53,recurve,70,hickory,left
-54,recurve,70,hickory,right
-55,recurve,72,osage orange,left
-56,recurve,72,osage orange,right
-57,recurve,72,yew,left
-58,recurve,72,yew,right
-59,recurve,72,hickory,left
-60,recurve,72,hickory,right
+ascii_drawings
+id,cat,elephant,frog,canadian_pride,wait_time,tag
+1,off,off,off,off,5,short_all_off
+2,off,off,off,off,60
+3,off,off,off,off,300,long_all_off
+4,off,off,off,on,5
+5,off,off,off,on,60
+6,off,off,off,on,300
+7,off,off,on,off,5
+8,off,off,on,off,60
+9,off,off,on,off,300
+10,off,off,on,on,5
+11,off,off,on,on,60
+12,off,off,on,on,300
+13,off,on,off,off,5
+14,off,on,off,off,60
+15,off,on,off,off,300
+16,off,on,off,on,5
+17,off,on,off,on,60
+18,off,on,off,on,300
+19,off,on,on,off,5
+20,off,on,on,off,60,favorite
+21,off,on,on,off,300
+22,off,on,on,on,5
+23,off,on,on,on,60
+24,off,on,on,on,300
+25,on,off,off,off,5
+26,on,off,off,off,60
+27,on,off,off,off,300
+28,on,off,off,on,5
+29,on,off,off,on,60
+30,on,off,off,on,300
+31,on,off,on,off,5
+32,on,off,on,off,60
+33,on,off,on,off,300
+34,on,off,on,on,5
+35,on,off,on,on,60
+36,on,off,on,on,300
+37,on,on,off,off,5
+38,on,on,off,off,60
+39,on,on,off,off,300
+40,on,on,off,on,5
+41,on,on,off,on,60
+42,on,on,off,on,300
+43,on,on,on,off,5
+44,on,on,on,off,60
+45,on,on,on,off,300
+46,on,on,on,on,5,short_all_on
+47,on,on,on,on,60
+48,on,on,on,on,300,long_all_on
