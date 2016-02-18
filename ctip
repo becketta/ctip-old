@@ -68,6 +68,8 @@ def main(argv):
             ctip.check(argv[2:])
         elif command == "clean":
             ctip.clean(argv[2:])
+        elif command == "status":
+            ctip.status(argv[2:])
         else:
             raise CTIPError("No CTIP command named '" + command + "'.")
 

@@ -106,7 +106,14 @@ def save(argv):
         ctip_utils.storeSnapshot(configTableName, outfile)
 
 def check(argv):
-    print "Check"
+    ctip_utils.updateJobs()
+
+def status(argv):
+    if len(argv) != 2:
+        raise ctip_utils.CTIPError("ctip status requires a job id and valid status")
+
+    db = ctip_utils.DatabaseManager()
+    db.updateJobStatus(argv[0],argv[1])
 
 def clean(argv):
     db = ctip_utils.DatabaseManager()

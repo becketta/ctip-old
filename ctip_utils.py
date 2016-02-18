@@ -6,6 +6,7 @@ import sqlite3 as sql
 import os
 import csv
 import datetime
+from subprocess import Popen, PIPE
 from multiprocessing import Process, Queue
 from Queue import Empty as QueueEmpty
 from copy import deepcopy
@@ -75,6 +76,19 @@ class DatabaseManager:
         self.conn.commit()
 
     def updateJobStatus(self, job_id, status):
+        valid_status = (
+                "submitted",
+                "queued",
+                "running",
+                "held",
+                "suspended",
+                "done"
+            )
+
+        if status not in valid_status:
+            raise CTIPError("Invalid job status")
+
+        job_id = job_id.split('.')[0]
         s = "UPDATE jobs SET status = ? WHERE job_id = ?"
         self.conn.execute(s, (status, job_id))
         self.conn.commit()
@@ -339,3 +353,46 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     for id in job_ids:
         manager.addJobToSession(session_id, id)
 
+def checkSession(session_id=None):
+    updateJobs()
+    manager = DatabaseManager()
+    if session_id:
+        where = "where id = {}".format(session_id)
+        colnames,sessions = manager.getRecords("sessions", where)
+    else:
+        colnames,sessions = manager.getRecords("sessions")
+
+def updateJobs():
+    # Get all job ids
+    manager = DatabaseManager()
+    colnames,jobs = manager.getRecords("jobs")
+    job_ids = []
+    for job in jobs:
+        job_ids.append(str(job['job_id']))
+
+    # Get output of qstat
+    proc = Popen(['qstat'], stdout=PIPE)
+    qstat = proc.stdout.read()
+    qstat = qstat.split('\n')
+
+    # Parse output to get the status of the active jobs
+    job_stats = []
+    for line in qstat:
+        if line:
+            line = line.split()
+            id = line[0].split('.')[0]
+            if id in job_ids:
+                job_stats.append( ( id, line[-2] ) )
+
+    # Report the status' to the database
+    for stat in job_stats:
+        if stat[1] == 'Q':
+            manager.updateJobStatus(stat[0], 'queued')
+        elif stat[1] == 'R':
+            manager.updateJobStatus(stat[0], 'running')
+        elif stat[1] == 'H':
+            manager.updateJobStatus(stat[0], 'held')
+        elif stat[1] == 'S': 
+            manager.updateJobStatus(stat[0], 'suspended')
+
+   
