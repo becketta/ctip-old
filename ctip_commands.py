@@ -106,7 +106,29 @@ def save(argv):
         ctip_utils.storeSnapshot(configTableName, outfile)
 
 def check(argv):
-    ctip_utils.updateJobs()
+    only_one = False
+    try:
+        session_id = getPrimaryArg(argv)
+        summary = ctip_utils.checkSession(session_id)
+        only_one = True
+    except ctip_utils.ParseError:
+        summary = ctip_utils.checkSession()
+
+    if only_one:
+        r = summary[0]
+        print("     id: {0}".format(r['id']))
+        print("configs: {0} {1}".format(r['config_group'],r['where_clause']))
+        print("   date: {0}".format(r['date']))
+
+        total = 0
+        for line in summary:
+            total += line['count()']
+        for line in summary:
+            percent = "{0:.0f}%".format(line['count()']/float(total) * 100)
+            print("{0}: {1}".format(line['status'], percent))
+    else:
+        # TODO: print shorted summary of all sessions
+        pass
 
 def status(argv):
     if len(argv) != 2:

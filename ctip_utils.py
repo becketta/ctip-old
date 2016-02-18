@@ -94,6 +94,7 @@ class DatabaseManager:
         self.conn.commit()
 
     def deleteFinishedSessions(self):
+        # TODO: delete only finished sessions
         print("Delete finished sessions")
 
     def deleteSession(self, session_id):
@@ -207,6 +208,18 @@ class DatabaseManager:
         # Execute the sql statements
         cur = self.conn.cursor()
         cur.executescript("".join(sqls))
+
+    def getSessionSummary(self, session_id=None):
+        cur = self.conn.cursor()
+        if session_id:
+            whereClause = "where id = {0}".format(session_id)
+            query = "select sessions.*, status, count() from sessions inner join jobs on id = session_id {0} group by status".format(whereClause)
+            cur.execute(query)
+        else:
+            query = "select sessions.*, status, count() from sessions inner join jobs on id = session_id group by id, status"
+            cur.execute(query)
+
+        return cur.fetchall()
 
 ###########################################################
 #   Utility Functions
@@ -356,11 +369,7 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
 def checkSession(session_id=None):
     updateJobs()
     manager = DatabaseManager()
-    if session_id:
-        where = "where id = {}".format(session_id)
-        colnames,sessions = manager.getRecords("sessions", where)
-    else:
-        colnames,sessions = manager.getRecords("sessions")
+    return manager.getSessionSummary(session_id)
 
 def updateJobs():
     # Get all job ids
