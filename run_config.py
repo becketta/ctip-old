@@ -101,6 +101,4 @@ def runConfig(config, queue, outdir=""):
     job_id = proc.stdout.read()
     job_id = job_id.strip().split('.')
     queue.put(job_id[0])
-    # Delete the temporary qsub file
-    os.remove(run_qsub)
 

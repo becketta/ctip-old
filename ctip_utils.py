@@ -268,10 +268,11 @@ def generateConfigTable(gen_file):
     cols = []
     colDict = {}
     for line in gen_file:
-        line = line.strip()
-        key,values = line.split('|')
-        cols.append(key)
-        colDict[key] = values.split(',')
+        if not line.startswith('#'):
+            line = line.strip()
+            key,values = line.split('|')
+            cols.append(key)
+            colDict[key] = values.split(',')
 
     configs = []
     for col in cols:
@@ -300,6 +301,8 @@ def parseTableName(reader):
     # Get the name of this group of configs
     configTableName = ""
     row = next(reader)
+    while row.startswith('#'):
+        row = next(reader)
     if len(row) == 1:
         configTableName = row[0]
     else:
