@@ -116,26 +116,42 @@ def check(argv):
 
     if only_one:
         r = summary[0]
-        print("     id: {0}".format(r['id']))
-        print("configs: {0} {1}".format(r['config_group'],r['where_clause']))
-        print("   date: {0}".format(r['date']))
+        where = ""
+        if r['where_clause']:
+            where = r['where_clause']
+        print("{0:>10}: {1}".format('id', r['id']))
+        print("{0:>10}: {1} {2}".format('configs', r['config_group'],where))
+        print("{0:>10}: {1}".format('date', r['date']))
 
         total = 0
         for line in summary:
             total += line['count()']
         for line in summary:
             percent = "{0:.0f}%".format(line['count()']/float(total) * 100)
-            print("{0}: {1}".format(line['status'], percent))
+            print("{0:>10}: {1}".format(line['status'], percent))
     else:
-        # TODO: print shorted summary of all sessions
-        pass
 
-def status(argv):
+        line_format = "{0:6} {1:8} {2:8} {3:8} {4:8}"
+        cols = ['id','queued','running','done','other'] 
+        seps = ['-'*5]
+        for i in range(4):
+            seps.append('-' * 7)
+        print(line_format.format(*cols))
+        print(line_format.format(*seps))
+
+def update_status(argv):
     if len(argv) != 2:
-        raise ctip_utils.CTIPError("ctip status requires a job id and valid status")
+        raise ctip_utils.CTIPError("update-status requires a job id and valid status")
 
     db = ctip_utils.DatabaseManager()
     db.updateJobStatus(argv[0],argv[1])
+
+def update_id(argv):
+    if len(argv) != 2:
+        raise ctip_utils.CTIPError("update-id requires a job id and new job id")
+
+    db = ctip_utils.DatabaseManager()
+    db.updateJobId(argv[0],argv[1])
 
 def clean(argv):
     db = ctip_utils.DatabaseManager()

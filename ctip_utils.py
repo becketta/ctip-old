@@ -76,22 +76,22 @@ class DatabaseManager:
         self.conn.commit()
 
     def updateJobStatus(self, job_id, status):
-        valid_status = (
-                "submitted",
-                "queued",
-                "running",
-                "held",
-                "suspended",
-                "done"
-            )
-
-        if status not in valid_status:
-            raise CTIPError("Invalid job status")
-
         job_id = job_id.split('.')[0]
         s = "UPDATE jobs SET status = ? WHERE job_id = ?"
-        self.conn.execute(s, (status, job_id))
+        cur = self.conn.cursor()
+        cur.execute(s, (status, job_id))
         self.conn.commit()
+        if cur.rowcount == 0:
+            raise CTIPError("Invalid job id: {0}".format(job_id))
+
+    def updateJobId(self, job_id, new_id):
+        job_id = job_id.split('.')[0]
+        s = "UPDATE jobs SET job_id = ? WHERE job_id = ?"
+        cur = self.conn.cursor()
+        cur.execute(s, (new_id, job_id))
+        self.conn.commit()
+        if cur.rowcount == 0:
+            raise CTIPError("Invalid job id: {0}".format(job_id))
 
     def deleteFinishedSessions(self):
         # TODO: delete only finished sessions

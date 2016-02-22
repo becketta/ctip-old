@@ -11,10 +11,17 @@ EXAMPLE_SCRIPT="/mnt/home/becketta/MarkovBrain/testing/ctip-tool/example_job.py"
 WAIT_TIME="%=wait_time"
 RUN_CONFIG="%=config_file"
 
+$CTIP log-start ${PBS_JOBID}
 $EXAMPLE_SCRIPT -t $WAIT_TIME -f $RUN_CONFIG
+$CTIP log-end ${PBS_JOBID}
 
-# Tell ctip the job is done
-$CTIP status ${PBS_JOBID} done
+# Error check
+if [ ! -f ascii_images ]; then
+    $CTIP update-status ${PBS_JOBID} error
+else
+    # Tell ctip the job completed without error
+    $CTIP update-status ${PBS_JOBID} done
+fi
 
 echo
 qstat -f ${PBS_JOBID}

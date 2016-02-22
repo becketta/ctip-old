@@ -13,41 +13,27 @@ helpText = """
 
 COMMANDS:
 
-    run:    ./ctip run [-o <out_dir>] <config_table_name>
+    *run:    ./ctip run [-o <out_dir>] [-q <qsub_template>] <config_table_name> ["<sql_where_clause>"]
                             OR
-            ./ctip run [-o <out_dir>] -f <config_file>
+            ./ctip run [-o <out_dir>] [-q <qsub_template>] -f <config_file> ["<sql_where_clause>"]
 
     gen:    ./ctip gen <gen_config_file>
 
     tables: ./ctip tables
 
-    list:   ./ctip list <table_name>
+    *list:   ./ctip list <table_name> ["<sql_where_clause>"]
 
     save:   ./ctip save [-o <out_dir>] <table_name>
 
-    check:  ./ctip check
+    *check:  ./ctip check [<session_id>]
 
-    clean:  ./ctip clean
-                OR
-            ./ctip clean <session_id>
+    *clean:  ./ctip clean [<session_id>]
 
-config_table_name
-    Name of the configuration table in the data base that stores
-    the configuration to be run by this script.
+    *update: ./ctip update-status <job_id> <status>
+            ./ctip update-id <job_id> <new_id>
 
--f, --config-file
-    Name of a csv file with configurations to run. The configurations
-    from this file will be used to fill a new sqlite table with the
-    config table name.
-
--g, --generate
-    If this option is present along with the -f option, the csv file is
-    assumed to contain each possible value for each config option
-    and the generated table of configurations will have all possible
-    combinations of these options.
-
--o, --outdir
-    Directory in which to place output files.
+    *log:    ./ctip log-start <job_id>
+            ./ctip log-end <job_id>
 """
 
 def main(argv):
@@ -68,8 +54,14 @@ def main(argv):
             ctip.check(argv[2:])
         elif command == "clean":
             ctip.clean(argv[2:])
-        elif command == "status":
-            ctip.status(argv[2:])
+        elif command == "update-status":
+            ctip.update_status(argv[2:])
+        elif command == "update-id":
+            ctip.update_id(argv[2:])
+        elif command == "log-start":
+            pass
+        elif command == "log-end":
+            pass
         else:
             raise CTIPError("No CTIP command named '" + command + "'.")
 
