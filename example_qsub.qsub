@@ -16,7 +16,7 @@ $EXAMPLE_SCRIPT -t $WAIT_TIME -f $RUN_CONFIG
 $CTIP log-end ${PBS_JOBID}
 
 # Error check
-if [ ! -f ascii_images ]; then
+if [ ! -f %=job_dir/ascii_images ]; then
     $CTIP update-status ${PBS_JOBID} error
 else
     # Tell ctip the job completed without error

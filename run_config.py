@@ -70,6 +70,7 @@ def runConfig(config, queue, outdir=""):
             # Should probably leave these mappings as is
             'job_name': runName,
             'shell_out_file': os.path.join(runDir, runName + ".o"),
+            'job_dir': runDir,
 
             # May want to edit these mappings and add your own, just
             # make sure there's a corresponding %=<key_name> in the
