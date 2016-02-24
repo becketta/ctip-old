@@ -12,7 +12,7 @@ from multiprocessing import Queue
 templated_qsub_file = "example_qsub.qsub"
 
 
-def runConfig(config, queue, outdir=""):
+def runConfig(config, queue, outdir="", qsub=templated_qsub_file):
     """Run a program using given configuration"""
 
     # Build the directory for this run
@@ -86,7 +86,7 @@ def runConfig(config, queue, outdir=""):
 
 
     # Create custom string Template from the qsub template
-    with open(templated_qsub_file, 'r') as qsub_template:
+    with open(qsub, 'r') as qsub_template:
         template = QsubBuilder(qsub_template.read())
 
     # Create the temporary qsub file from the template using subst_dict

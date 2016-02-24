@@ -33,7 +33,7 @@ class QsubBuilder(Template):
 class DatabaseManager:
     """Handles interactions with the local SQLite Database used by ctip."""
 
-    dbname = "test.db"
+    dbname = "ctip.db"
     reserved_table_names = [ 'sessions', 'jobs' ]
 
     def __init__(self):
@@ -51,6 +51,8 @@ class DatabaseManager:
                 session_id INT,
                 job_id TEXT,
                 status TEXT,
+                time_log TEXT,
+                runtime TEXT,
                 PRIMARY KEY (session_id, job_id)
             );
         """)
@@ -83,6 +85,22 @@ class DatabaseManager:
         self.conn.commit()
         if cur.rowcount == 0:
             raise CTIPError("Invalid job id: {0}".format(job_id))
+
+    def startJob(self, job_id):
+        job_id = job_id.split('.')[0]
+        print("start")
+
+    def pauseJob(self, job_id):
+        job_id = job_id.split('.')[0]
+        print("pause")
+
+    def resumeJob(self, job_id):
+        job_id = job_id.split('.')[0]
+        print("resume")
+
+    def endJob(self, job_id):
+        job_id = job_id.split('.')[0]
+        print("end")
 
     def updateJobId(self, job_id, new_id):
         job_id = job_id.split('.')[0]
@@ -301,7 +319,7 @@ def parseTableName(reader):
     # Get the name of this group of configs
     configTableName = ""
     row = next(reader)
-    while row.startswith('#'):
+    while row[0].startswith('#'):
         row = next(reader)
     if len(row) == 1:
         configTableName = row[0]
@@ -312,7 +330,7 @@ def parseTableName(reader):
 
     return configTableName
 
-def initTestSession(test_func, table, whereClause="", outdir=""):
+def initTestSession(test_func, table, whereClause="", outdir="", qsub=None):
     """
     Initialize a test session of all configs in 'table' that satisfy
     the 'whereClause'.
@@ -353,7 +371,10 @@ def initTestSession(test_func, table, whereClause="", outdir=""):
     jobs = []
     id_queue = Queue()
     for config in configs:
-        p = Process(target=test_func, args=(config, id_queue, testBatchDir))
+        if qsub:
+            p = Process(target=test_func, args=(config, id_queue, testBatchDir, qsub))
+        else:
+            p = Process(target=test_func, args=(config, id_queue, testBatchDir))
         p.start()
         jobs.append(p)
     for p in jobs:

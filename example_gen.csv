@@ -1,3 +1,7 @@
+# This gen file will populate a config table in the
+# ctip database called 'ascii_drawings' with all
+# combinations of the given parameters based on the
+# possible values for each parameter.
 ascii_drawings
 cat|off,on
 elephant|off,on

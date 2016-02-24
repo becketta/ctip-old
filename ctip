@@ -59,9 +59,13 @@ def main(argv):
         elif command == "update-id":
             ctip.update_id(argv[2:])
         elif command == "log-start":
-            pass
+            ctip.log_start(argv[2:])
+        elif command == "log-pause":
+            ctip.log_pause(argv[2:])
+        elif command == "log-resume":
+            ctip.log_resume(argv[2:])
         elif command == "log-end":
-            pass
+            ctip.log_end(argv[2:])
         else:
             raise CTIPError("No CTIP command named '" + command + "'.")
 

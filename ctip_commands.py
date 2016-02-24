@@ -11,8 +11,8 @@ def run(argv):
     #
     # Get command line args with getopt
     #
-    shortArgs = "o:f:"
-    longArgs = ["outdir=", "config-file="]
+    shortArgs = "o:q:f:"
+    longArgs = ["outdir=", "qsub=", "config-file="]
     try:
         opts,args = getopt.getopt(argv, shortArgs, longArgs)
     except getopt.GetoptError:
@@ -40,10 +40,13 @@ def run(argv):
     # Parse command line args
     #
     outDir = ""
+    qsubFile = ""
     configFileName = ""
     for opt, arg in opts:
         if opt in ("-o", "--outdir"):
             outDir = arg
+        elif opt in ("-q", "--qsub"):
+            qsubFile = arg
         elif opt in ("-f", "--config-file"):
             configFileName = arg
     #
@@ -58,7 +61,7 @@ def run(argv):
     #
     # Initialize the test session!
     #
-    ctip_utils.initTestSession(runConfig, configTable, whereClause, outDir)
+    ctip_utils.initTestSession(runConfig, configTable, whereClause, outDir, qsubFile)
     print "Jobs submitted!"
 
 def gen(argv):
@@ -142,16 +145,38 @@ def check(argv):
 def update_status(argv):
     if len(argv) != 2:
         raise ctip_utils.CTIPError("update-status requires a job id and valid status")
-
     db = ctip_utils.DatabaseManager()
     db.updateJobStatus(argv[0],argv[1])
 
 def update_id(argv):
     if len(argv) != 2:
         raise ctip_utils.CTIPError("update-id requires a job id and new job id")
-
     db = ctip_utils.DatabaseManager()
     db.updateJobId(argv[0],argv[1])
+
+def log_start(argv):
+    if len(argv) != 1:
+        raise ctip_utils.CTIPError("log-start only requires a job id")
+    db = ctip_utils.DatabaseManager()
+    db.startJob(argv[0])
+
+def log_pause(argv):
+    if len(argv) != 1:
+        raise ctip_utils.CTIPError("log-pause only requires a job id")
+    db = ctip_utils.DatabaseManager()
+    db.pauseJob(argv[0])
+
+def log_resume(argv):
+    if len(argv) != 1:
+        raise ctip_utils.CTIPError("log-resume only requires a job id")
+    db = ctip_utils.DatabaseManager()
+    db.resumeJob(argv[0])
+
+def log_end(argv):
+    if len(argv) != 1:
+        raise ctip_utils.CTIPError("log-end only requires a job id")
+    db = ctip_utils.DatabaseManager()
+    db.endJob(argv[0])
 
 def clean(argv):
     db = ctip_utils.DatabaseManager()
