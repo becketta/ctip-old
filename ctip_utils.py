@@ -33,7 +33,7 @@ class QsubBuilder(Template):
 class DatabaseManager:
     """Handles interactions with the local SQLite Database used by ctip."""
 
-    dbname = "ctip.db"
+    dbname = "/mnt/home/becketta/MarkovBrain/testing/ctip-tool/ctip.db"
     reserved_table_names = [ 'sessions', 'jobs' ]
 
     def __init__(self):
@@ -88,19 +88,36 @@ class DatabaseManager:
 
     def startJob(self, job_id):
         job_id = job_id.split('.')[0]
-        print("start")
+        s = "UPDATE jobs SET time_log = datetime('now') WHERE job_id = ?"
+        self.conn.execute(s, (job_id,))
+        self.conn.commit()
 
     def pauseJob(self, job_id):
-        job_id = job_id.split('.')[0]
-        print("pause")
+        self.incRuntime(job_id)
+        self.conn.commit()
 
     def resumeJob(self, job_id):
-        job_id = job_id.split('.')[0]
-        print("resume")
+        self.startJob(job_id)
 
     def endJob(self, job_id):
+        self.incRuntime(job_id)
         job_id = job_id.split('.')[0]
-        print("end")
+        s = "UPDATE jobs SET time_log = NULL WHERE job_id = ?"
+        self.conn.execute(s, (job_id,))
+        self.conn.commit()
+
+    def incRuntime(self, job_id):
+        job_id = job_id.split('.')[0]
+        s = """
+        UPDATE jobs SET runtime = (
+            SELECT CAST((
+                strftime('%s', datetime('now')) -
+                strftime('%s', (SELECT time_log FROM jobs
+                                WHERE job_id = :id))
+            ) AS TEXT)
+        ) WHERE job_id = :id
+        """
+        self.conn.execute(s, {"id": job_id})
 
     def updateJobId(self, job_id, new_id):
         job_id = job_id.split('.')[0]
