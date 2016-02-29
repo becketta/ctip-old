@@ -149,11 +149,10 @@ class DatabaseManager:
 
     def printTable(self, table, where=''):
         """Print the records from a specific table in a pretty format."""
-        cur = self.conn.cursor()
-        cur.execute('SELECT * FROM {0} {1}'.format(table, where))
+        colnames,records = self.getRecords(table, where)
+        printrows = [colnames]
 
-        printrows = [[cn[0] for cn in cur.description]]
-        for row in cur.fetchall():
+        for row in records:
             strlist = []
             for e in row:
                 strlist.append(str(e))
@@ -176,10 +175,8 @@ class DatabaseManager:
 
     def getRecords(self, table, whereClause=""):
 
-        query = "SELECT * FROM " + table + " " + whereClause
-
         cur = self.conn.cursor()
-        cur.execute(query)
+        cur.execute("SELECT * FROM {0} {1}".format(table, whereClause))
 
         # Get the column names
         colnames = [cn[0] for cn in cur.description]

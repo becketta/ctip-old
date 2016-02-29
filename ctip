@@ -13,27 +13,45 @@ helpText = """
 
 COMMANDS:
 
-    *run:    ./ctip run [-o <out_dir>] [-q <qsub_template>] <config_table_name> ["<sql_where_clause>"]
+    *run:    ./ctip run [OPTIONS] <config_table_name> ["<sql_where_clause>"]
                             OR
-            ./ctip run [-o <out_dir>] [-q <qsub_template>] -f <config_file> ["<sql_where_clause>"]
+            ./ctip run [OPTIONS] -f <config_file> ["<sql_where_clause>"]
 
     gen:    ./ctip gen <gen_config_file>
 
     tables: ./ctip tables
 
-    *list:   ./ctip list <table_name> ["<sql_where_clause>"]
+    list:   ./ctip list <table_name> ["<sql_where_clause>"]
 
-    save:   ./ctip save [-o <out_dir>] <table_name>
+    save:   ./ctip save [-o <out_file>] <table_name>
 
     *check:  ./ctip check [<session_id>]
 
     *clean:  ./ctip clean [<session_id>]
 
-    *update: ./ctip update-status <job_id> <status>
+    update: ./ctip update-status <job_id> <status>
             ./ctip update-id <job_id> <new_id>
 
-    *log:    ./ctip log-start <job_id>
+    log:    ./ctip log-start <job_id>
+            ./ctip log-pause <job_id>
+            ./ctip log-resume <job_id>
             ./ctip log-end <job_id>
+
+OPTIONS:
+
+    -o, --outdir:
+        Specify in which directory the test session folder should be placed.
+        By default the session directory will be placed in a folder named
+        after its config table and located in the root ctip directory.
+
+    -q, --qsub:
+        Specify which qsub template should be used when sumbitting jobs
+        for this test session.
+
+    -n, --name:
+        Provide a name for this test session. The name will be appended
+        the the end of the default session directory name which is a
+        date-time string.
 """
 
 def main(argv):
