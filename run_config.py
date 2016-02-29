@@ -101,5 +101,5 @@ def runConfig(config, queue, outdir="", qsub=templated_qsub_file):
     proc = Popen(['qsub', run_qsub], stdout=PIPE)
     job_id = proc.stdout.read()
     job_id = job_id.strip().split('.')
-    queue.put(job_id[0])
+    queue.put( (job_id[0], runName) )
 

@@ -18,16 +18,9 @@ def run(argv):
     except getopt.GetoptError:
         m = "Unable to extract command line args."
         raise ctip_utils.ParseError('args', m)
-    #
-    # Get the where clause if present
-    #
-    whereClause = ""
-    for s in args:
-        if string.lower(s).startswith("where"):
-            whereClause = s
-            break
-    if whereClause:
-        args.remove(whereClause)
+
+    whereClause = getWhereClause(args)
+
     #
     # Get the config table name if present
     #
@@ -78,10 +71,11 @@ def tables(argv):
     db.listConfigTables()
 
 def list(argv):
+    whereClause = getWhereClause(argv)
     configTableName = getPrimaryArg(argv)
 
     db = ctip_utils.DatabaseManager()
-    db.printTable(configTableName)
+    db.printTable(configTableName, whereClause)
 
 def save(argv):
     #
@@ -195,4 +189,15 @@ def getPrimaryArg(argv):
         raise ctip_utils.ParseError("args", "Unable to parse table name.")
 
     return configTableName
+
+def getWhereClause(args):
+    """Get the where clause if present."""
+    whereClause = ""
+    for s in args:
+        if string.lower(s).startswith("where"):
+            whereClause = s
+            break
+    if whereClause:
+        args.remove(whereClause)
+    return whereClause
 

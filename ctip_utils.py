@@ -49,6 +49,7 @@ class DatabaseManager:
 
             CREATE TABLE IF NOT EXISTS jobs(
                 session_id INT,
+                config_id INT,
                 job_id TEXT,
                 status TEXT,
                 time_log TEXT,
@@ -72,9 +73,9 @@ class DatabaseManager:
         self.conn.commit()
         return new_session_id
 
-    def addJobToSession(self, session_id, job_id):
-        s = "INSERT INTO jobs(session_id,job_id,status) values(?,?,?)"
-        self.conn.execute(s, (session_id, job_id, "submitted"))
+    def addJobToSession(self, session_id, config_id, job_id):
+        s = "INSERT INTO jobs(session_id,config_id,job_id,status) values(?,?,?,?)"
+        self.conn.execute(s, (session_id, config_id, job_id, "submitted"))
         self.conn.commit()
 
     def updateJobStatus(self, job_id, status):
@@ -146,10 +147,10 @@ class DatabaseManager:
             if row[0] not in self.reserved_table_names:
                 print row[0]
 
-    def printTable(self, table):
+    def printTable(self, table, where=''):
         """Print the records from a specific table in a pretty format."""
         cur = self.conn.cursor()
-        cur.execute('SELECT * FROM ' + table)
+        cur.execute('SELECT * FROM {0} {1}'.format(table, where))
 
         printrows = [[cn[0] for cn in cur.description]]
         for row in cur.fetchall():
@@ -404,8 +405,8 @@ def initTestSession(test_func, table, whereClause="", outdir="", qsub=None):
     except QueueEmpty:
         pass
 
-    for id in job_ids:
-        manager.addJobToSession(session_id, id)
+    for id,cfg_id in job_ids:
+        manager.addJobToSession(session_id, cfg_id, id)
 
 def checkSession(session_id=None):
     updateJobs()
