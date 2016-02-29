@@ -130,14 +130,25 @@ class DatabaseManager:
             raise CTIPError("Invalid job id: {0}".format(job_id))
 
     def deleteFinishedSessions(self):
-        # TODO: delete only finished sessions
-        print("Delete finished sessions")
+        cols,sessions = self.getRecords("sessions")
+
+        finished_sessions = []
+        query = "SELECT * from jobs WHERE session_id=? and status!='done'"
+        for session in sessions:
+            unfinished = self.conn.execute(query, (session['id'],))
+            if not unfinished.fetchall():
+                finished_sessions.append(session)
+
+        print("Sessions deleted:")
+        for session in finished_sessions:
+            print(session)
+            self.deleteSession(session['id'])
 
     def deleteSession(self, session_id):
         s = "DELETE FROM jobs WHERE session_id = ?"
-        self.conn.execute(s, (session_id))
+        self.conn.execute(s, (session_id,))
         s = "DELETE FROM sessions WHERE id = ?"
-        self.conn.execute(s, (session_id))
+        self.conn.execute(s, (session_id,))
         self.conn.commit()
 
     def listConfigTables(self):
