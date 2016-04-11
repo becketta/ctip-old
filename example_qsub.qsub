@@ -5,9 +5,11 @@
 #PBS -o %=shell_out_file
 cd ${PBS_O_WORKDIR}
 
-CTIP="/mnt/home/becketta/MarkovBrain/testing/ctip-tool/ctip"
+CTIP_ROOT="/mnt/home/becketta/ctip-tool/"
 
-EXAMPLE_SCRIPT="/mnt/home/becketta/MarkovBrain/testing/ctip-tool/example_job.py"
+CTIP=$CTIP_ROOT"ctip"
+
+EXAMPLE_SCRIPT=$CTIP_ROOT"example_job.py"
 WAIT_TIME="%=wait_time"
 RUN_CONFIG="%=config_file"
 

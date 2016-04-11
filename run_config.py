@@ -2,14 +2,16 @@
 # Created by Aaron Beckett January, 2016
 #
 import os, sys
-from ctip_utils import QsubBuilder
 from subprocess import Popen, PIPE
 from multiprocessing import Queue
+
+from ctip_utils import QsubBuilder
+from ctip_constants import CTIP_ROOT
 
 ################################################################
 # Set this variable to the name of your templated qsub file
 ################################################################
-templated_qsub_file = "example_qsub.qsub"
+templated_qsub_file = CTIP_ROOT + "example_qsub.qsub"
 
 
 def runConfig(config, queue, outdir="", qsub=templated_qsub_file):
@@ -31,7 +33,7 @@ def runConfig(config, queue, outdir="", qsub=templated_qsub_file):
     runDir = os.path.join(outdir, runName)
     os.makedirs(runDir)
 
-    # Generate the config file for this run
+    # Generate the config file name for this run
     cfg_file = os.path.join(runDir, runName + ".cfg")
 
 

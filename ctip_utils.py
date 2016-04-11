@@ -12,6 +12,8 @@ from Queue import Empty as QueueEmpty
 from copy import deepcopy
 from string import Template
 
+from ctip_constants import CTIP_ROOT
+
 ###########################################################
 #   Utility Classes
 #
@@ -33,7 +35,7 @@ class QsubBuilder(Template):
 class DatabaseManager:
     """Handles interactions with the local SQLite Database used by ctip."""
 
-    dbname = "/mnt/home/becketta/MarkovBrain/testing/ctip-tool/ctip.db"
+    dbname = CTIP_ROOT + "ctip.db"
     reserved_table_names = [ 'sessions', 'jobs' ]
 
     def __init__(self):

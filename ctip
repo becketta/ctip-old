@@ -25,9 +25,9 @@ COMMANDS:
 
     save:   ./ctip save [-o <out_file>] <table_name>
 
-    *check:  ./ctip check [<session_id>]
+    check:  ./ctip check [<session_id>]
 
-    *clean:  ./ctip clean [<session_id>]
+    clean:  ./ctip clean [<session_id>]
 
     update: ./ctip update-status <job_id> <status>
             ./ctip update-id <job_id> <new_id>
