@@ -44,7 +44,7 @@ def runConfig(config, queue, outdir="", qsub_file=QSUB_TEMPLATE):
         'world': config['world'],
         'decoder': config['decoder'],
         'gates': config['gates'],
-        'gate_complexity': config['gate_complexity'],
+        'gate_complexity': config['complexity'],
         'trials': config['trials'],
         'length': config['length'],
         'optimizer': config['optimizer'],

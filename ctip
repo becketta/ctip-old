@@ -13,7 +13,7 @@ helpText = """
 
 COMMANDS:
 
-    *run:    ./ctip run [OPTIONS] <config_table_name> ["<sql_where_clause>"]
+    run:    ./ctip run [OPTIONS] <config_table_name> ["<sql_where_clause>"]
                             OR
             ./ctip run [OPTIONS] -f <config_file> ["<sql_where_clause>"]
 
