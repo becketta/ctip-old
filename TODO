@@ -1,0 +1,16 @@
+#
+#   TODO LIST
+#
+
+BUGS:
+    -> Add job ids as they become available instead of
+        at the end to avoid HPCC slowdown issues
+
+IMPROVEMENTS:
+    -> Add default output directory in constants file
+    -> Add range specification to gen files:
+            <key>|<min>-<max>:<step>,...
+    -> More thorough treatment of comments in both csv and gen files
+    -> qsub checkpointing
+    -> Resubmit jobs that fail due to I/O error in HPCC
+

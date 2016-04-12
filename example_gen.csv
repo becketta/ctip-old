@@ -3,7 +3,7 @@
 # combinations of the given parameters based on the
 # possible values for each parameter.
 ascii_drawings
-cat|off,on
+cat|on
 elephant|off,on
 frog|off,on
 canadian_pride|off,on
