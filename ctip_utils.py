@@ -44,6 +44,7 @@ class DatabaseManager:
         self.conn.executescript("""
             CREATE TABLE IF NOT EXISTS sessions(
                 id INTEGER PRIMARY KEY,
+                name TEXT,
                 config_group TEXT,
                 where_clause TEXT,
                 date TEXT
@@ -63,13 +64,14 @@ class DatabaseManager:
     def __del__(self):
         self.conn.close()
 
-    def newSession(self, config_group, datetime, whereClause=""):
+    def newSession(self, config_group, session_name, datetime, whereClause=""):
         cur = self.conn.cursor()
         if whereClause:
-            s = "INSERT INTO sessions(config_group, where_clause, date) values(?,?,?)"
-            cur.execute(s, (config_group, whereClause, datetime))
+            s = "INSERT INTO sessions(name, config_group, where_clause, date) values(?,?,?,?)"
+            cur.execute(s, (session_name, config_group, whereClause, datetime))
         else:
-            cur.execute("INSERT INTO sessions(config_group, date) values(?,?)", (config_group, datetime))
+            s = "INSERT INTO sessions(name, config_group, date) values(?,?,?)"
+            cur.execute(s, (session_name, config_group, datetime))
 
         new_session_id = cur.lastrowid
         self.conn.commit()
@@ -358,7 +360,7 @@ def parseTableName(reader):
 
     return configTableName
 
-def initTestSession(test_func, table, whereClause="", outdir="", qsub=None):
+def initTestSession(test_func, table, whereClause="", outdir="", qsub=None, name=None):
     """
     Initialize a test session of all configs in 'table' that satisfy
     the 'whereClause'.
@@ -373,6 +375,8 @@ def initTestSession(test_func, table, whereClause="", outdir="", qsub=None):
     # Create a folder for this test session based on the date and time
     #   -> The directory being created is:
     #           <outDir>/<configTable>/<date_time>/
+    #   -> If a session_name is specified, the directory is:
+    #           <outDir>/<configTable>/<session_name>/
     #   -> Each config will create a folder in this directory
     #
     now = datetime.datetime.now()
@@ -380,7 +384,11 @@ def initTestSession(test_func, table, whereClause="", outdir="", qsub=None):
     timestamp = now.strftime("%Y-%m-%d_%H.%M.") + str(sec)
     sql_datetime_str = now.strftime("%Y-%m-%d %H:%M:") + str(sec)
 
-    testBatchDir = os.path.join(outdir, table, timestamp)
+    session_name = name
+    if not session_name:
+        session_name = timestamp
+
+    testBatchDir = os.path.join(outdir, table, session_name)
     try:
         os.makedirs(testBatchDir)
     except OSError:
@@ -393,7 +401,7 @@ def initTestSession(test_func, table, whereClause="", outdir="", qsub=None):
         writeConfigCsv(sf, table, colnames, configs)
 
     # Add this session info to the sessions table
-    session_id = manager.newSession(table, sql_datetime_str, whereClause)
+    session_id = manager.newSession(table, name, sql_datetime_str, whereClause)
 
     # Call the test_function for each config
     jobs = []

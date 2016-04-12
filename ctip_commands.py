@@ -11,8 +11,8 @@ def run(argv):
     #
     # Get command line args with getopt
     #
-    shortArgs = "o:q:f:"
-    longArgs = ["outdir=", "qsub=", "config-file="]
+    shortArgs = "o:q:n:f:"
+    longArgs = ["outdir=", "qsub=", "name=", "config-file="]
     try:
         opts,args = getopt.getopt(argv, shortArgs, longArgs)
     except getopt.GetoptError:
@@ -24,7 +24,7 @@ def run(argv):
     #
     # Get the config table name if present
     #
-    configTable = ""
+    configTable = None
     try:
         configTable = getPrimaryArg(args)
     except ctip_utils.ParseError:
@@ -33,28 +33,36 @@ def run(argv):
     # Parse command line args
     #
     outDir = ""
-    qsubFile = ""
-    configFileName = ""
+    qsubFile = None
+    session_name = None
+    configFileName = None
     for opt, arg in opts:
         if opt in ("-o", "--outdir"):
             outDir = arg
         elif opt in ("-q", "--qsub"):
             qsubFile = arg
+        elif opt in ("-n", "--name"):
+            session_name = arg
         elif opt in ("-f", "--config-file"):
             configFileName = arg
     #
     # See if they've called run correctly and handle a config file
     #
-    if configTable != "" and configFileName != "":
+    if configTable and configFileName:
         m = "Cannot specify both a config table and a config file to run."
         raise ctip_utils.ParseError('args', m)
-    elif configFileName != "":
+    elif configFileName:
         with open(configFileName, 'r') as configFile:
             configTable = ctip_utils.createConfigTable(configFile)
     #
     # Initialize the test session!
     #
-    ctip_utils.initTestSession(runConfig, configTable, whereClause, outDir, qsubFile)
+    ctip_utils.initTestSession(runConfig,
+            configTable,
+            whereClause,
+            outDir,
+            qsubFile,
+            session_name)
     print "Jobs submitted!"
 
 def gen(argv):
@@ -116,16 +124,17 @@ def check(argv):
         where = ""
         if r['where_clause']:
             where = r['where_clause']
-        print("{0:>10}: {1}".format('id', r['id']))
-        print("{0:>10}: {1} {2}".format('configs', r['config_group'],where))
-        print("{0:>10}: {1}".format('date', r['date']))
+        print("{0:>12}: {1}".format('id', r['id']))
+        print("{0:>12}: {1}".format('session name', r['name']))
+        print("{0:>12}: {1} {2}".format('configs', r['config_group'],where))
+        print("{0:>12}: {1}".format('date', r['date']))
 
         total = 0
         for line in summary:
             total += line['count()']
         for line in summary:
             percent = percentString(line['count()'], total)
-            print("{0:>10}: {1}".format(line['status'], percent))
+            print("{0:>12}: {1}".format(line['status'], percent))
     else:
         line_format = "{0:<6} {1:8} {2:8} {3:8} {4:8}"
         cols = ['id','queued','running','done','other'] 
