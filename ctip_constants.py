@@ -1,3 +1,5 @@
 CTIP_ROOT="/mnt/home/becketta/ctip-tool/"
+CTIP_DB="/mnt/home/becketta/ctip-tool/ctip.db"
+RUN_CONFIG="run_config"
 QSUB_TEMPLATE="/mnt/home/becketta/MarkovBrain/testing/qsubTemplate.qsub"
 CFG_TEMPLATE="/mnt/home/becketta/MarkovBrain/testing/configTemplate.cfg"

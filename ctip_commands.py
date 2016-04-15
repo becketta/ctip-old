@@ -3,9 +3,12 @@
 #
 import getopt
 import string
+import os
 
 import ctip_utils
-from run_config import runConfig
+from ctip_constants import RUN_CONFIG
+_run_module = __import__(RUN_CONFIG)
+runCfg = _run_module.runConfig
 
 def run(argv):
     #
@@ -32,7 +35,7 @@ def run(argv):
     #
     # Parse command line args
     #
-    outDir = ""
+    outDir = os.getcwd()
     qsubFile = None
     session_name = None
     configFileName = None
@@ -57,7 +60,7 @@ def run(argv):
     #
     # Initialize the test session!
     #
-    ctip_utils.initTestSession(runConfig,
+    ctip_utils.initTestSession(runCfg,
             configTable,
             whereClause,
             outDir,

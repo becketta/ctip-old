@@ -7,7 +7,6 @@ BUGS:
         at the end to avoid HPCC slowdown issues
 
 IMPROVEMENTS:
-    -> Add default output directory in constants file
     -> Add range specification to gen files:
             <key>|<min>-<max>:<step>,...
     -> More thorough treatment of comments in both csv and gen files
