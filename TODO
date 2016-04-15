@@ -7,9 +7,24 @@ BUGS:
         at the end to avoid HPCC slowdown issues
 
 IMPROVEMENTS:
+    CTIP CONFIGURATION:
+    *-> Add HPCC flag
+    *-> Add ctip file structure flag
+
+    GEN/CFG FILES:
+    *-> Ability to directly run a gen file
     -> Add range specification to gen files:
             <key>|<min>-<max>:<step>,...
+    -> Add nested params to gen files
     -> More thorough treatment of comments in both csv and gen files
+
+    CONFIG RUNNING:
+    -> Local runs (break runConfig into initJob and runJob)
+    -> Gracefull fail for hitting memory limit in HCPP
     -> qsub checkpointing
     -> Resubmit jobs that fail due to I/O error in HPCC
+
+    MISC:
+    *-> Use argparse instead of getopt
+    -> Make compatible with Python3
 

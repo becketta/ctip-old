@@ -13,29 +13,29 @@ helpText = """
 
 COMMANDS:
 
-    run:    ./ctip run [OPTIONS] <config_table_name> ["<sql_where_clause>"]
+    run:    ctip run [OPTIONS] <config_table_name> ["<sql_where_clause>"]
                             OR
-            ./ctip run [OPTIONS] -f <config_file> ["<sql_where_clause>"]
+            ctip run [OPTIONS] -f <config_file> ["<sql_where_clause>"]
 
-    gen:    ./ctip gen <gen_config_file>
+    gen:    ctip gen <gen_config_file>
 
-    tables: ./ctip tables
+    tables: ctip tables
 
-    list:   ./ctip list <table_name> ["<sql_where_clause>"]
+    list:   ctip list <table_name> ["<sql_where_clause>"]
 
-    save:   ./ctip save [-o <out_file>] <table_name>
+    save:   ctip save [-o <out_file>] <table_name>
 
-    check:  ./ctip check [<session_id>]
+    check:  ctip check [<session_id>]
 
-    clean:  ./ctip clean [<session_id>]
+    clean:  ctip clean [<session_id>]
 
-    update: ./ctip update-status <job_id> <status>
-            ./ctip update-id <job_id> <new_id>
+    update: ctip update-status <job_id> <status>
+            ctip update-id <job_id> <new_id>
 
-    log:    ./ctip log-start <job_id>
-            ./ctip log-pause <job_id>
-            ./ctip log-resume <job_id>
-            ./ctip log-end <job_id>
+    log:    ctip log-start <job_id>
+            ctip log-pause <job_id>
+            ctip log-resume <job_id>
+            ctip log-end <job_id>
 
 OPTIONS:
 
