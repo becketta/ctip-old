@@ -6,7 +6,9 @@ from subprocess import Popen, PIPE
 from multiprocessing import Queue
 
 from ctip_utils import QsubBuilder
-from ctip_constants import QSUB_TEMPLATE, CFG_TEMPLATE
+
+QSUB_TEMPLATE = "/mnt/home/becketta/MarkovBrain/testing/qsubTemplate.qsub"
+CFG_TEMPLATE = "/mnt/home/becketta/MarkovBrain/testing/configTemplate.cfg"
 
 ################################################################
 # Set this variable to the name of your templated qsub file

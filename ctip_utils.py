@@ -12,7 +12,7 @@ from Queue import Empty as QueueEmpty
 from copy import deepcopy
 from string import Template
 
-from ctip_constants import CTIP_DB
+import ctip_constants as ctip
 
 ###########################################################
 #   Utility Classes
@@ -35,7 +35,7 @@ class QsubBuilder(Template):
 class DatabaseManager:
     """Handles interactions with the local SQLite Database used by ctip."""
 
-    dbname = CTIP_DB
+    dbname = ctip.CONFIG_DB
     reserved_table_names = [ 'sessions', 'jobs' ]
 
     def __init__(self):
@@ -388,15 +388,17 @@ def initTestSession(test_func, table, whereClause="", outdir="", qsub=None, name
     if not session_name:
         session_name = timestamp
 
-    testBatchDir = os.path.join(outdir, table, session_name)
-    try:
-        os.makedirs(testBatchDir)
-    except OSError:
-        if not os.path.isdir(testBatchDir):
-            raise RuntimeError('Could not create the output directory')
+    testBatchDir = outdir
+    if ctip.CREATE_DIR_STRUCTURE:
+        testBatchDir = os.path.join(outdir, table, session_name)
+        try:
+            os.makedirs(testBatchDir)
+        except OSError:
+            if not os.path.isdir(testBatchDir):
+                raise RuntimeError('Could not create the output directory')
 
     # Store text file snapshot of config table at root session dir
-    snapshotPath = os.path.join(testBatchDir, "configs.csv")
+    snapshotPath = os.path.join(testBatchDir, table + ".csv")
     with open(snapshotPath, 'w') as sf:
         writeConfigCsv(sf, table, colnames, configs)
 
@@ -432,36 +434,38 @@ def checkSession(session_id=None):
     return manager.getSessionSummary(session_id)
 
 def updateJobs():
-    # Get all job ids
-    manager = DatabaseManager()
-    colnames,jobs = manager.getRecords("jobs")
-    job_ids = []
-    for job in jobs:
-        job_ids.append(str(job['job_id']))
+    if ctip.ON_HPCC:
+        # Get all job ids
+        manager = DatabaseManager()
+        colnames,jobs = manager.getRecords("jobs")
+        job_ids = []
+        for job in jobs:
+            job_ids.append(str(job['job_id']))
 
-    # Get output of qstat
-    proc = Popen(['qstat'], stdout=PIPE)
-    qstat = proc.stdout.read()
-    qstat = qstat.split('\n')
+        # Get output of qstat
+        proc = Popen(['qstat'], stdout=PIPE)
+        qstat = proc.stdout.read()
+        qstat = qstat.split('\n')
 
-    # Parse output to get the status of the active jobs
-    job_stats = []
-    for line in qstat:
-        if line:
-            line = line.split()
-            id = line[0].split('.')[0]
-            if id in job_ids:
-                job_stats.append( ( id, line[-2] ) )
+        # Parse output to get the status of the active jobs
+        job_stats = []
+        for line in qstat:
+            if line:
+                line = line.split()
+                id = line[0].split('.')[0]
+                if id in job_ids:
+                    job_stats.append( ( id, line[-2] ) )
 
-    # Report the status' to the database
-    for stat in job_stats:
-        if stat[1] == 'Q':
-            manager.updateJobStatus(stat[0], 'queued')
-        elif stat[1] == 'R':
-            manager.updateJobStatus(stat[0], 'running')
-        elif stat[1] == 'H':
-            manager.updateJobStatus(stat[0], 'held')
-        elif stat[1] == 'S': 
-            manager.updateJobStatus(stat[0], 'suspended')
+        # Report the status' to the database
+        for stat in job_stats:
+            if stat[1] == 'Q':
+                manager.updateJobStatus(stat[0], 'queued')
+            elif stat[1] == 'R':
+                manager.updateJobStatus(stat[0], 'running')
+            elif stat[1] == 'H':
+                manager.updateJobStatus(stat[0], 'held')
+            elif stat[1] == 'S': 
+                manager.updateJobStatus(stat[0], 'suspended')
 
-   
+
+

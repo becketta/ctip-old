@@ -21,6 +21,7 @@ IMPROVEMENTS:
     CONFIG RUNNING:
     -> Local runs (break runConfig into initJob and runJob)
     -> Gracefull fail for hitting memory limit in HCPP
+            o Look into using smem?
     -> qsub checkpointing
     -> Resubmit jobs that fail due to I/O error in HPCC
 
