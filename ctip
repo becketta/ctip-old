@@ -3,21 +3,20 @@
 # Created by Aaron Beckett January, 2016
 #
 
-import sys
+import sys, os
+import argparse
 
 from ctip_utils import CTIPError
 import ctip_commands as ctip
 
-helpText = """
-./ctip <command> <args>
+help_text = """
+ctip <command> <args>
 
 COMMANDS:
 
-    run:    ctip run [OPTIONS] <config_table_name> ["<sql_where_clause>"]
-                            OR
-            ctip run [OPTIONS] -f <config_file> ["<sql_where_clause>"]
-
-    gen:    ctip gen <gen_config_file>
+    run:    ctip run table <config_table> ["<sql_where_clause>"] [OPTIONS]
+            ctip run file <config_file> ["<sql_where_clause>"] [OPTIONS]
+            ctip run gen <gen_file> ["<sql_where_clause>"] [OPTIONS]
 
     tables: ctip tables
 
@@ -29,71 +28,139 @@ COMMANDS:
 
     clean:  ctip clean [<session_id>]
 
-    update: ctip update-status <job_id> <status>
-            ctip update-id <job_id> <new_id>
+    update: ctip update status <job_id> <status>
+            ctip update id <job_id> <new_id>
 
-    log:    ctip log-start <job_id>
-            ctip log-pause <job_id>
-            ctip log-resume <job_id>
-            ctip log-end <job_id>
+    log:    ctip log start <job_id>
+            ctip log pause <job_id>
+            ctip log resume <job_id>
+            ctip log end <job_id>
 
 OPTIONS:
 
     -o, --outdir:
-        Specify in which directory the test session folder should be placed.
-        By default the session directory will be placed in a folder named
-        after its config table and located in the root ctip directory.
+        Specify the root directory for the ctip run. By default a folder
+        named after the session's config table will be created in your
+        current directory containing a directory with the session name
+        in which each configuration will get it's own folder. If you
+        set CREATE_DIR_STRUCTURE to 'False' in the ctip_constants file
+        then the configuration folders will just be created in your
+        current directory.
 
     -q, --qsub:
         Specify which qsub template should be used when sumbitting jobs
         for this test session.
 
     -n, --name:
-        Provide a name for this test session. The name will be appended
-        the the end of the default session directory name which is a
-        date-time string.
+        Provide a name for this test session. By default the session name
+        is a date-time string.
 """
 
+# Create command line argument parsers
+parser = argparse.ArgumentParser()
+
+subparsers = parser.add_subparsers()
+parser_run = subparsers.add_parser('run')
+parser_tables = subparsers.add_parser('tables')
+parser_list = subparsers.add_parser('list')
+parser_save = subparsers.add_parser('save')
+parser_check = subparsers.add_parser('check')
+parser_clean = subparsers.add_parser('clean')
+parser_update = subparsers.add_parser('update')
+parser_log = subparsers.add_parser('log')
+
+# run
+subparsers_run = parser_run.add_subparsers()
+parser_run_table = subparsers_run.add_parser('table')
+parser_run_file = subparsers_run.add_parser('file')
+parser_run_gen = subparsers_run.add_parser('gen')
+# run table
+parser_run_table.add_argument('table_name')
+parser_run_table.set_defaults(func=ctip.run_table)
+parser_run_table.add_argument('where_clause', nargs='*')
+parser_run_table.add_argument('-o', '--outdir', default=os.getcwd())
+parser_run_table.add_argument('-q', '--qsub')
+parser_run_table.add_argument('-n', '--name')
+# run file
+parser_run_file.add_argument('csv_file')
+parser_run_file.set_defaults(func=ctip.run_file)
+parser_run_file.add_argument('where_clause', nargs='*')
+parser_run_file.add_argument('-o', '--outdir', default=os.getcwd())
+parser_run_file.add_argument('-q', '--qsub')
+parser_run_file.add_argument('-n', '--name')
+# run gen
+parser_run_gen.add_argument('gen_file')
+parser_run_gen.set_defaults(func=ctip.run_gen)
+parser_run_gen.add_argument('where_clause', nargs='*')
+parser_run_gen.add_argument('-o', '--outdir', default=os.getcwd())
+parser_run_gen.add_argument('-q', '--qsub')
+parser_run_gen.add_argument('-n', '--name')
+
+# tables
+parser_tables.set_defaults(func=ctip.tables)
+
+# list
+parser_list.add_argument('table_name')
+parser_list.add_argument('where_clause', nargs='*')
+parser_list.set_defaults(func=ctip.list)
+
+# save
+parser_save.add_argument('table_name')
+parser_save.add_argument('-o', '--outfile')
+parser_save.set_defaults(func=ctip.save)
+
+# check
+parser_check.add_argument('session_id', nargs='?')
+parser_check.set_defaults(func=ctip.check)
+
+# clean
+parser_clean.add_argument('session_id', nargs='?')
+parser_clean.set_defaults(func=ctip.clean)
+
+# update
+subparsers_update = parser_update.add_subparsers()
+parser_update_status = subparsers_update.add_parser('status')
+parser_update_id = subparsers_update.add_parser('id')
+# update status
+parser_update_status.add_argument('job_id')
+parser_update_status.add_argument('new_status')
+parser_update_status.set_defaults(func=ctip.update_status)
+# update id
+parser_update_id.add_argument('job_id')
+parser_update_id.add_argument('new_id')
+parser_update_id.set_defaults(func=ctip.update_id)
+
+# log
+subparsers_log = parser_log.add_subparsers()
+parser_log_start = subparsers_log.add_parser('start')
+parser_log_pause = subparsers_log.add_parser('pause')
+parser_log_resume = subparsers_log.add_parser('resume')
+parser_log_end = subparsers_log.add_parser('end')
+parser_log.add_argument('job_id')
+# log start
+parser_log_start.set_defaults(func=ctip.log_start)
+# log pause
+parser_log_pause.set_defaults(func=ctip.log_pause)
+# log resume
+parser_log_resume.set_defaults(func=ctip.log_resume)
+# log end
+parser_log_end.set_defaults(func=ctip.log_end)
+
+
 def main(argv):
+
+    if(len(argv) == 1):
+        print(help_text)
+        exit(0)
+
+    # Parse the command line arguments with the parser
+    args = parser.parse_args(argv[1:])
+
     try:
-        command = argv[1]
-
-        if command == "run":
-            ctip.run(argv[2:])
-        elif command == "gen":
-            ctip.gen(argv[2:])
-        elif command == "tables":
-            ctip.tables(argv[2:])
-        elif command == "list":
-            ctip.list(argv[2:])
-        elif command == "save":
-            ctip.save(argv[2:])
-        elif command == "check":
-            ctip.check(argv[2:])
-        elif command == "clean":
-            ctip.clean(argv[2:])
-        elif command == "update-status":
-            ctip.update_status(argv[2:])
-        elif command == "update-id":
-            ctip.update_id(argv[2:])
-        elif command == "log-start":
-            ctip.log_start(argv[2:])
-        elif command == "log-pause":
-            ctip.log_pause(argv[2:])
-        elif command == "log-resume":
-            ctip.log_resume(argv[2:])
-        elif command == "log-end":
-            ctip.log_end(argv[2:])
-        else:
-            raise CTIPError("No CTIP command named '" + command + "'.")
-
-    except IndexError, RuntimeError:
-        print(helpText)
-        sys.exit(2)
-
+        args.func(args)
     except CTIPError as e:
         print(e.msg)
-        
+
 if __name__ == "__main__":
     main(sys.argv)
 

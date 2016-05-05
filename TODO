@@ -8,8 +8,8 @@ BUGS:
 
 IMPROVEMENTS:
     CTIP CONFIGURATION:
-    *-> Add HPCC flag
-    *-> Add ctip file structure flag
+    => Add HPCC flag
+    => Add ctip file structure flag
 
     GEN/CFG FILES:
     *-> Ability to directly run a gen file
@@ -27,5 +27,6 @@ IMPROVEMENTS:
 
     MISC:
     *-> Use argparse instead of getopt
+    -> Add where clause to save command
     -> Make compatible with Python3
 

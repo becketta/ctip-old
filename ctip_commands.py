@@ -8,119 +8,54 @@ import os
 import ctip_utils
 from ctip_constants import RUN_CONFIG
 _run_module = __import__(RUN_CONFIG)
-runCfg = _run_module.runConfig
+run_cfg = _run_module.runConfig
 
-def run(argv):
-    #
-    # Get command line args with getopt
-    #
-    shortArgs = "o:q:n:f:"
-    longArgs = ["outdir=", "qsub=", "name=", "config-file="]
-    try:
-        opts,args = getopt.getopt(argv, shortArgs, longArgs)
-    except getopt.GetoptError:
-        m = "Unable to extract command line args."
-        raise ctip_utils.ParseError('args', m)
+def run_table(args):
+    run(args.table_name, args)
 
-    whereClause = getWhereClause(args)
+def run_file(args):
+    with open(args.csv_file, 'r') as cfg_file:
+        table = ctip_utils.createConfigTable(cfg_file)
+    run(table, args)
 
-    #
-    # Get the config table name if present
-    #
-    configTable = None
-    try:
-        configTable = getPrimaryArg(args)
-    except ctip_utils.ParseError:
-        pass
-    #
-    # Parse command line args
-    #
-    outDir = os.getcwd()
-    qsubFile = None
-    session_name = None
-    configFileName = None
-    for opt, arg in opts:
-        if opt in ("-o", "--outdir"):
-            outDir = arg
-        elif opt in ("-q", "--qsub"):
-            qsubFile = arg
-        elif opt in ("-n", "--name"):
-            session_name = arg
-        elif opt in ("-f", "--config-file"):
-            configFileName = arg
-    #
-    # See if they've called run correctly and handle a config file
-    #
-    if configTable and configFileName:
-        m = "Cannot specify both a config table and a config file to run."
-        raise ctip_utils.ParseError('args', m)
-    elif configFileName:
-        with open(configFileName, 'r') as configFile:
-            configTable = ctip_utils.createConfigTable(configFile)
-    #
+def run_gen(args):
+    with open(args.gen_file, 'r') as cfg_schema:
+        table = ctip_utils.generateConfigTable(cfg_schema)
+    run(table, args)
+
+def run(table, args):
     # Initialize the test session!
-    #
-    ctip_utils.initTestSession(runCfg,
-            configTable,
-            whereClause,
-            outDir,
-            qsubFile,
-            session_name)
-    print "Jobs submitted!"
+    ctip_utils.initTestSession(
+        run_cfg,
+        table,
+        ' '.join(args.where_clause),
+        args.outdir,
+        args.qsub,
+        args.name
+    )
+    print("Jobs submitted!")
 
-def gen(argv):
-    genfileName = getPrimaryArg(argv)
-
-    try:
-        with open(genfileName, 'r') as configSchema:
-            ctip_utils.generateConfigTable(configSchema)
-    except IOError:
-        pass
-
-def tables(argv):
+def tables(args):
     db = ctip_utils.DatabaseManager()
     db.listConfigTables()
 
-def list(argv):
-    whereClause = getWhereClause(argv)
-    configTableName = getPrimaryArg(argv)
-
+def list(args):
     db = ctip_utils.DatabaseManager()
-    db.printTable(configTableName, whereClause)
+    db.printTable(args.table_name, ' '.join(args.where_clause))
 
-def save(argv):
-    #
-    # Get command line args with getopt
-    #
-    shortArgs = "o:"
-    longArgs = ["outfile="]
-    try:
-        opts,args = getopt.getopt(argv, shortArgs, longArgs)
-    except getopt.GetoptError:
-        m = "Unable to extract command line args."
-        raise ctip_utils.ParseError('args', m)
-    #
-    # Parse command line args
-    #
-    configTableName = getPrimaryArg(args)
-    outFileName = ""
-    for opt, arg in opts:
-        if opt in ("-o", "--outfile"):
-            outFileName = arg
-    if not outFileName:
-        outFileName = configTableName + '.csv'
+def save(args):
+    out_file_name = args.outfile
+    if not out_file_name:
+        out_file_name = args.table_name + '.csv'
 
-    with open(outFileName, 'w') as outfile:
-        ctip_utils.storeSnapshot(configTableName, outfile)
+    with open(out_file_name, 'w') as outfile:
+        ctip_utils.storeSnapshot(args.table_name, outfile)
 
-def check(argv):
+def check(args):
     only_one = False
-    try:
-        session_id = getPrimaryArg(argv)
-        summary = ctip_utils.checkSession(session_id)
+    if args.session_id:
         only_one = True
-    except ctip_utils.ParseError:
-        summary = ctip_utils.checkSession()
+    summary = ctip_utils.checkSession(args.session_id)
 
     if only_one:
         r = summary[0]
@@ -177,68 +112,34 @@ def check(argv):
 def percentString(part, whole):
     return "{0:.0f}%".format(part/float(whole) * 100)
 
-def update_status(argv):
-    if len(argv) != 2:
-        raise ctip_utils.CTIPError("update-status requires a job id and valid status")
+def update_status(args):
     db = ctip_utils.DatabaseManager()
-    db.updateJobStatus(argv[0],argv[1])
+    db.updateJobStatus(args.job_id, args.new_status)
 
-def update_id(argv):
-    if len(argv) != 2:
-        raise ctip_utils.CTIPError("update-id requires a job id and new job id")
+def update_id(args):
     db = ctip_utils.DatabaseManager()
-    db.updateJobId(argv[0],argv[1])
+    db.updateJobId(args.job_id, args.new_id)
 
-def log_start(argv):
-    if len(argv) != 1:
-        raise ctip_utils.CTIPError("log-start only requires a job id")
+def log_start(args):
     db = ctip_utils.DatabaseManager()
-    db.startJob(argv[0])
+    db.startJob(args.job_id)
 
-def log_pause(argv):
-    if len(argv) != 1:
-        raise ctip_utils.CTIPError("log-pause only requires a job id")
+def log_pause(args):
     db = ctip_utils.DatabaseManager()
-    db.pauseJob(argv[0])
+    db.pauseJob(args.job_id)
 
-def log_resume(argv):
-    if len(argv) != 1:
-        raise ctip_utils.CTIPError("log-resume only requires a job id")
+def log_resume(args):
     db = ctip_utils.DatabaseManager()
-    db.resumeJob(argv[0])
+    db.resumeJob(args.job_id)
 
-def log_end(argv):
-    if len(argv) != 1:
-        raise ctip_utils.CTIPError("log-end only requires a job id")
+def log_end(args):
     db = ctip_utils.DatabaseManager()
-    db.endJob(argv[0])
+    db.endJob(args.job_id)
 
-def clean(argv):
+def clean(args):
     db = ctip_utils.DatabaseManager()
-    try:
-        session_id = getPrimaryArg(argv)
-        db.deleteSession(session_id)
-    except ctip_utils.ParseError:
-        db.deleteFinishedSessions()
-
-def getPrimaryArg(argv):
-    """Gets the first argument in args."""
-    configTableName = ""
-    if len(argv) == 1:
-        configTableName = argv[0]
+    if session_id:
+        db.deleteSession(args.session_id)
     else:
-        raise ctip_utils.ParseError("args", "Unable to parse table name.")
-
-    return configTableName
-
-def getWhereClause(args):
-    """Get the where clause if present."""
-    whereClause = ""
-    for s in args:
-        if string.lower(s).startswith("where"):
-            whereClause = s
-            break
-    if whereClause:
-        args.remove(whereClause)
-    return whereClause
+        db.deleteFinishedSessions()
 

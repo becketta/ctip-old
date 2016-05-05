@@ -23,12 +23,6 @@ class CTIPError(Exception):
     def __init__(self, msg):
         self.msg = msg
 
-class ParseError(CTIPError):
-    """Raised when ctip is unable to parse command line args or csv files."""
-    def __init__(self, category, msg):
-        super(ParseError,self).__init__(msg)
-        self.category = category
-
 class QsubBuilder(Template):
     delimiter = '%='
 
