@@ -11,7 +11,7 @@ from ctip_constants import CTIP_ROOT
 ################################################################
 # Set this variable to the name of your templated qsub file
 ################################################################
-templated_qsub_file = CTIP_ROOT + "examples/example_qsub.qsub"
+templated_qsub_file = CTIP_ROOT + "example_qsub.qsub"
 
 
 def runConfig(config, queue, outdir="", qsub=templated_qsub_file):
