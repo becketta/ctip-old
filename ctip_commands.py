@@ -5,7 +5,7 @@ import getopt
 import string
 import os
 
-import ctip_utils
+import ctip_funcs
 from ctip_dbm import DatabaseManager
 from ctip_constants import RUN_CONFIG
 _run_module = __import__(RUN_CONFIG)
@@ -16,17 +16,17 @@ def run_table(args):
 
 def run_file(args):
     with open(args.csv_file, 'r') as cfg_file:
-        table = ctip_utils.createConfigTable(cfg_file)
+        table = ctip_funcs.createConfigTable(cfg_file)
     run(table, args)
 
 def run_gen(args):
     with open(args.gen_file, 'r') as cfg_schema:
-        table = ctip_utils.generateConfigTable(cfg_schema)
+        table = ctip_funcs.generateConfigTable(cfg_schema)
     run(table, args)
 
 def run(table, args):
     # Initialize the test session!
-    ctip_utils.initTestSession(
+    ctip_funcs.initTestSession(
         run_cfg,
         table,
         ' '.join(args.where_clause),
@@ -50,13 +50,13 @@ def save(args):
         out_file_name = args.table_name + '.csv'
 
     with open(out_file_name, 'w') as outfile:
-        ctip_utils.storeSnapshot(args.table_name, outfile)
+        ctip_funcs.storeSnapshot(args.table_name, outfile)
 
 def check(args):
     only_one = False
     if args.session_id:
         only_one = True
-    summary = ctip_utils.checkSession(args.session_id)
+    summary = ctip_funcs.checkSession(args.session_id)
 
     if only_one:
         r = summary[0]

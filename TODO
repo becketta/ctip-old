@@ -13,7 +13,7 @@ IMPROVEMENTS:
 
     GEN/CFG FILES:
     => Ability to directly run a gen file
-    -> Add range specification to gen files:
+    => Add range specification to gen files:
             <key>|<min>-<max>:<step>,...
     -> Add nested params to gen files
     -> More thorough treatment of comments in both csv and gen files
