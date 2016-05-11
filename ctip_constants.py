@@ -3,10 +3,10 @@ CTIP_ROOT = "/mnt/home/becketta/ctip-tool/"
 
 # It's wise to edit these
 CREATE_DIR_STRUCTURE = False
-ON_HPCC = False
+ON_HPCC = True
 
 # Only edit these if you know what you're doing
-RUN_CONFIG = "run_config"
+RUN_CONFIG = "example_run_config"
 
 # Shouldn't edit this unless you want your ctip
 # sqlite database file located in a specific place
