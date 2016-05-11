@@ -9,7 +9,7 @@ CTIP_ROOT="/mnt/home/becketta/ctip-tool/"
 
 CTIP=$CTIP_ROOT"ctip"
 
-EXAMPLE_SCRIPT=$CTIP_ROOT"example_job.py"
+EXAMPLE_SCRIPT=$CTIP_ROOT"examples/example_job.py"
 WAIT_TIME="%=wait_time"
 RUN_CONFIG="%=config_file"
 

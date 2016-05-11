@@ -64,6 +64,8 @@ def generateConfigTable(gen_file):
         if not line.startswith('#'):
             line = line.strip()
             key,tokens = line.split('|')
+            key = key.strip()
+            tokens = tokens.strip()
             cols.append(key)
             values = []
             for token in tokens.split(','):
