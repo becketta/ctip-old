@@ -6,6 +6,7 @@ import string
 import os
 
 import ctip_utils
+from ctip_dbm import DatabaseManager
 from ctip_constants import RUN_CONFIG
 _run_module = __import__(RUN_CONFIG)
 run_cfg = _run_module.runConfig
@@ -36,11 +37,11 @@ def run(table, args):
     print("Jobs submitted!")
 
 def tables(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.listConfigTables()
 
 def list(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.printTable(args.table_name, ' '.join(args.where_clause))
 
 def save(args):
@@ -113,32 +114,32 @@ def percentString(part, whole):
     return "{0:.0f}%".format(part/float(whole) * 100)
 
 def update_status(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.updateJobStatus(args.job_id, args.new_status)
 
 def update_id(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.updateJobId(args.job_id, args.new_id)
 
 def log_start(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.startJob(args.job_id)
 
 def log_pause(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.pauseJob(args.job_id)
 
 def log_resume(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.resumeJob(args.job_id)
 
 def log_end(args):
-    db = ctip_utils.DatabaseManager()
+    db = DatabaseManager()
     db.endJob(args.job_id)
 
 def clean(args):
-    db = ctip_utils.DatabaseManager()
-    if session_id:
+    db = DatabaseManager()
+    if args.session_id:
         db.deleteSession(args.session_id)
     else:
         db.deleteFinishedSessions()
