@@ -5,6 +5,7 @@
 import sqlite3 as sql
 
 import ctip_constants as ctip
+from ctip_utils import CTIPError
 
 
 class DatabaseManager:
@@ -135,7 +136,7 @@ class DatabaseManager:
         query = "SELECT name FROM sqlite_master WHERE type='table'"
         for row in self.conn.execute(query):
             if row[0] not in self.reserved_table_names:
-                print row[0]
+                print(row[0])
 
     def printTable(self, table, where=''):
         """Print the records from a specific table in a pretty format."""
@@ -161,7 +162,7 @@ class DatabaseManager:
             printstr += "%-" + str(w) + "s "
 
         for row in printrows:
-            print printstr % tuple(row)
+            print(printstr.format(tuple(row)))
 
     def getRecords(self, table, whereClause=""):
 

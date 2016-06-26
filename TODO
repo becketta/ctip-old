@@ -5,6 +5,7 @@
 BUGS:
     -> Add job ids as they become available instead of
         at the end to avoid HPCC slowdown issues
+	-> increment job runtime overwrites previous runtime info instead of adding to it
 
 IMPROVEMENTS:
     CTIP CONFIGURATION:

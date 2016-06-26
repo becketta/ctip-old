@@ -10,7 +10,7 @@ from multiprocessing import Process, Queue
 from Queue import Empty as QueueEmpty
 from copy import deepcopy
 
-from ctip_utils import *
+from ctip_utils import CTIPError, frange
 import ctip_constants as ctip
 from ctip_dbm import DatabaseManager
 

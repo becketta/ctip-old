@@ -1,9 +1,6 @@
 #
 # Created by Aaron Beckett January, 2016
 #
-import getopt
-import string
-import os
 
 import ctip_funcs
 from ctip_dbm import DatabaseManager
